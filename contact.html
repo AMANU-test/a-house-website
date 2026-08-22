@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contact — A-HOUSE</title>
 <meta name="description" content="Get in touch with A-HOUSE — the Atenean Hub of Upcoming Student Entrepreneurs.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Contact — A-HOUSE">
+<meta property="og:description" content="Get in touch with A-HOUSE — the Atenean Hub of Upcoming Student Entrepreneurs.">
+<meta property="og:image" content="https://a-house.netlify.app/assets/og-image.jpg">
+<meta property="og:url" content="https://a-house.netlify.app/contact.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Contact — A-HOUSE">
+<meta name="twitter:description" content="Get in touch with A-HOUSE — the Atenean Hub of Upcoming Student Entrepreneurs.">
+<meta name="twitter:image" content="https://a-house.netlify.app/assets/og-image.jpg">
 <link rel="icon" href="assets/logo-icon-sm.png">
 <link rel="stylesheet" href="css/style.css">
 <style>
@@ -65,7 +74,7 @@
       <div class="grid">
 
         <div class="card">
-          <h3 style="font-size:17px; margin-bottom:6px;">Reach a channel directly</h3>
+          <h2 style="font-size:17px; margin-bottom:6px;">Reach a channel directly</h2>
 
           <div class="contact-channel">
             <div class="card-code">EMAIL</div>
@@ -109,24 +118,32 @@
         </div>
 
         <div class="card">
-          <h3 style="font-size:17px; margin-bottom:16px;">Send a message</h3>
-          <!-- Placeholder form — not yet wired to a backend. Netlify Forms is the simplest option: add data-netlify="true" and a hidden form-name input once ready to go live. -->
-          <form class="contact-form" onsubmit="return false;">
+          <h2 style="font-size:17px; margin-bottom:16px;">Send a message</h2>
+          <!-- Netlify Forms: detected at deploy time from this static markup, no backend needed.
+               Submitted via fetch() in js/contact.js so the page doesn't navigate away. -->
+          <form class="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="contact-form">
+            <input type="hidden" name="form-name" value="contact">
+            <p style="position:absolute; left:-9999px;" aria-hidden="true">
+              <label>Leave this field blank: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+            </p>
             <div class="field">
               <label for="name">Name</label>
-              <input id="name" name="name" type="text" placeholder="Juan Dela Cruz">
+              <input id="name" name="name" type="text" placeholder="Juan Dela Cruz" required>
             </div>
             <div class="field">
               <label for="email">Email</label>
-              <input id="email" name="email" type="email" placeholder="juan.delacruz@obf.ateneo.edu">
+              <input id="email" name="email" type="email" placeholder="juan.delacruz@obf.ateneo.edu" required>
             </div>
             <div class="field">
               <label for="message">Message</label>
-              <textarea id="message" name="message" placeholder="How can we help?"></textarea>
+              <textarea id="message" name="message" placeholder="How can we help?" required></textarea>
             </div>
             <button class="btn solid" type="submit" style="align-self:flex-start;">Send message</button>
-            <p style="font-size:12px; color:var(--slate-soft); font-family:var(--mono);">This form is a placeholder for now — for anything urgent, email us directly above.</p>
           </form>
+          <div class="contact-success" id="contact-success" hidden>
+            <div class="card-code" style="color:var(--orange);">MESSAGE SENT</div>
+            <p class="lead" style="margin-top:8px;">Thanks for reaching out — we'll get back to you soon. For anything urgent, email us directly above.</p>
+          </div>
         </div>
 
       </div>
@@ -137,14 +154,28 @@
 
 <footer>
   <div class="wrap">
-    <div class="foot-grid">
-      <div>
-        <div class="foot-brand">
-          <img class="brand-mark" src="assets/logo-icon-sm.png" alt="A-HOUSE logo">
-          <div class="foot-brand-text">Atenean Hub of Upcoming<br>Student Entrepreneurs</div>
-        </div>
-        <div class="foot-meta">Ateneo de Manila University, Loyola Heights Campus, Quezon City, PH<br><a href="mailto:ahouse.connect@gmail.com">ahouse.connect@gmail.com</a></div>
+    <div class="foot-top">
+      <div class="foot-brand">
+        <img class="brand-mark" src="assets/logo-icon-white.png" alt="A-HOUSE logo">
+        <div class="foot-brand-text">Atenean Hub of Upcoming<br>Student Entrepreneurs</div>
       </div>
+      <div class="foot-social">
+        <a class="social-btn" href="https://www.facebook.com/profile.php?id=61573829886359" target="_blank" rel="noopener" aria-label="A-HOUSE on Facebook">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.9 21v-8.4h2.8l.4-3.3h-3.2V7.1c0-.9.3-1.6 1.6-1.6h1.7V2.5C16.9 2.4 15.8 2.3 14.6 2.3c-2.6 0-4.4 1.6-4.4 4.5v2.5H7.4v3.3h2.8V21h3.7Z"/></svg>
+        </a>
+        <a class="social-btn" href="https://www.instagram.com/ahouse_org?igsi=ZTVzamh6dnVwcXMz" target="_blank" rel="noopener" aria-label="A-HOUSE on Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.3" y="3.3" width="17.4" height="17.4" rx="5"/><circle cx="12" cy="12" r="4.3"/><circle cx="17.1" cy="6.9" r="0.9" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a class="social-btn" href="https://www.tiktok.com/@ahouse.org" target="_blank" rel="noopener" aria-label="A-HOUSE on TikTok">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 3c.3 2 1.7 3.6 3.7 3.9v2.8a6.6 6.6 0 0 1-3.7-1.1v6.7a5.5 5.5 0 1 1-5.5-5.5c.2 0 .4 0 .6 0v2.8a2.7 2.7 0 1 0 2 2.6V3h2.9Z"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="foot-divider"></div>
+
+    <div class="foot-bottom">
+      <div class="foot-meta">Ateneo de Manila University, Loyola Heights Campus, Quezon City, PH<br><a href="mailto:ahouse.connect@gmail.com">ahouse.connect@gmail.com</a></div>
       <div class="foot-links">
         <a href="about.html">About Us</a>
         <a href="events.html">Events</a>
@@ -157,5 +188,6 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script src="js/contact.js"></script>
 </body>
 </html>
