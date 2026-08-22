@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — A-HOUSE</title>
+<meta name="description" content="Get in touch with A-HOUSE — the Atenean Hub of Upcoming Student Entrepreneurs.">
+<link rel="icon" href="assets/logo-icon-sm.png">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .contact-form{display:flex; flex-direction:column; gap:16px; max-width:520px;}
+  .field label{display:block; font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--slate); margin-bottom:6px;}
+  .field input, .field textarea{
+    width:100%; padding:11px 14px; border-radius:10px; border:1px solid var(--line);
+    background:var(--card); font-family:var(--body); font-size:14px; color:var(--ink);
+  }
+  .field textarea{resize:vertical; min-height:120px;}
+  .field input:focus, .field textarea:focus{outline:2px solid var(--navy-light); outline-offset:1px;}
+  .contact-channel{display:flex; align-items:flex-start; gap:14px; padding:16px 0; border-top:1px solid var(--line);}
+  .contact-channel:first-child{border-top:none;}
+  .contact-channel .card-code{min-width:110px;}
+</style>
+</head>
+<body>
+
+<header data-header data-page="contact">
+  <div class="nav">
+    <a class="brand" href="index.html">
+      <img class="brand-mark" src="assets/logo-icon-sm.png" alt="A-HOUSE logo">
+      <div>
+        <div class="brand-text">A-HOUSE</div>
+        <div class="brand-sub">Atenean Hub of Upcoming Student Entrepreneurs</div>
+      </div>
+    </a>
+    <nav class="links">
+      <a href="index.html" data-page="home">Home</a>
+      <a href="about.html" data-page="about">About Us</a>
+      <a href="events.html" data-page="events">Events</a>
+      <a href="directory.html" data-page="directory">Role Directory</a>
+      <a href="contact.html" data-page="contact">Contact</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle menu"><span></span></button>
+  </div>
+  <div class="mobile-links">
+    <a href="index.html" data-page="home">Home</a>
+    <a href="about.html" data-page="about">About Us</a>
+    <a href="events.html" data-page="events">Events</a>
+    <a href="directory.html" data-page="directory">Role Directory</a>
+    <a href="contact.html" data-page="contact">Contact</a>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero hero-compact">
+    <div class="wrap">
+      <span class="eyebrow">Contact</span>
+      <h1 style="margin-top:14px;">Let's talk.</h1>
+      <p>Questions about membership, partnerships, or events — reach out and the right team will get back to you.</p>
+    </div>
+  </section>
+
+  <section class="section tight">
+    <div class="wrap">
+      <div class="grid">
+
+        <div class="card">
+          <h3 style="font-size:17px; margin-bottom:6px;">Reach a channel directly</h3>
+
+          <div class="contact-channel">
+            <div class="card-code">EMAIL</div>
+            <div>
+              <div style="font-weight:600;">General inquiries</div>
+              <a class="lead" style="display:block; margin-top:2px;" href="mailto:ahouse.connect@gmail.com">ahouse.connect@gmail.com</a>
+            </div>
+          </div>
+
+          <div class="contact-channel">
+            <div class="card-code">INSTAGRAM</div>
+            <div>
+              <div style="font-weight:600;">@ahouse_org</div>
+              <a class="lead" style="display:block; margin-top:2px;" href="https://www.instagram.com/ahouse_org?igsi=ZTVzamh6dnVwcXMz" target="_blank" rel="noopener">instagram.com/ahouse_org</a>
+            </div>
+          </div>
+
+          <div class="contact-channel">
+            <div class="card-code">FACEBOOK</div>
+            <div>
+              <div style="font-weight:600;">Atenean Hub Of Upcoming Student Entrepreneurs</div>
+              <a class="lead" style="display:block; margin-top:2px;" href="https://www.facebook.com/profile.php?id=61573829886359" target="_blank" rel="noopener">facebook.com/AHOUSE</a>
+            </div>
+          </div>
+
+          <div class="contact-channel">
+            <div class="card-code">TIKTOK</div>
+            <div>
+              <div style="font-weight:600;">@ahouse.org</div>
+              <a class="lead" style="display:block; margin-top:2px;" href="https://www.tiktok.com/@ahouse.org" target="_blank" rel="noopener">tiktok.com/@ahouse.org</a>
+            </div>
+          </div>
+
+          <div class="contact-channel">
+            <div class="card-code">LOCATION</div>
+            <div>
+              <div style="font-weight:600;">Ateneo de Manila University</div>
+              <div class="lead" style="margin-top:2px;">Loyola Heights Campus, Quezon City, Philippines</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="font-size:17px; margin-bottom:16px;">Send a message</h3>
+          <!-- Placeholder form — not yet wired to a backend. Netlify Forms is the simplest option: add data-netlify="true" and a hidden form-name input once ready to go live. -->
+          <form class="contact-form" onsubmit="return false;">
+            <div class="field">
+              <label for="name">Name</label>
+              <input id="name" name="name" type="text" placeholder="Juan Dela Cruz">
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" placeholder="juan.delacruz@obf.ateneo.edu">
+            </div>
+            <div class="field">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" placeholder="How can we help?"></textarea>
+            </div>
+            <button class="btn solid" type="submit" style="align-self:flex-start;">Send message</button>
+            <p style="font-size:12px; color:var(--slate-soft); font-family:var(--mono);">This form is a placeholder for now — for anything urgent, email us directly above.</p>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <img class="brand-mark" src="assets/logo-icon-sm.png" alt="A-HOUSE logo">
+          <div class="foot-brand-text">Atenean Hub of Upcoming<br>Student Entrepreneurs</div>
+        </div>
+        <div class="foot-meta">Ateneo de Manila University, Loyola Heights Campus, Quezon City, PH<br><a href="mailto:ahouse.connect@gmail.com">ahouse.connect@gmail.com</a></div>
+      </div>
+      <div class="foot-links">
+        <a href="about.html">About Us</a>
+        <a href="events.html">Events</a>
+        <a href="directory.html">Role Directory</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+    <div class="foot-note">© 2026 A-HOUSE, Ateneo de Manila University.</div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

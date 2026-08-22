@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Role Directory — A-HOUSE</title>
+<meta name="description" content="Every officer position in A-HOUSE — responsibilities, reporting lines, and the skills each role needs.">
+<link rel="icon" href="assets/logo-icon-sm.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header data-header data-page="directory">
+  <div class="nav">
+    <a class="brand" href="index.html">
+      <img class="brand-mark" src="assets/logo-icon-sm.png" alt="A-HOUSE logo">
+      <div>
+        <div class="brand-text">A-HOUSE</div>
+        <div class="brand-sub">Atenean Hub of Upcoming Student Entrepreneurs</div>
+      </div>
+    </a>
+    <nav class="links">
+      <a href="index.html" data-page="home">Home</a>
+      <a href="about.html" data-page="about">About Us</a>
+      <a href="events.html" data-page="events">Events</a>
+      <a href="directory.html" data-page="directory">Role Directory</a>
+      <a href="contact.html" data-page="contact">Contact</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle menu"><span></span></button>
+  </div>
+  <div class="mobile-links">
+    <a href="index.html" data-page="home">Home</a>
+    <a href="about.html" data-page="about">About Us</a>
+    <a href="events.html" data-page="events">Events</a>
+    <a href="directory.html" data-page="directory">Role Directory</a>
+    <a href="contact.html" data-page="contact">Contact</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero hero-compact">
+    <div class="wrap">
+      <span class="eyebrow">Role Directory</span>
+      <h1 style="margin-top:14px;">Get to know the role<br>before you <em>apply.</em></h1>
+      <p>Find out where you'd fit on the board! Here's every officer position in A-HOUSE, along with the expected responsibilities and skills needed.</p>
+      <div class="hero-actions">
+        <button class="btn solid" onclick="scrollToId('management-board')">Browse Management Board roles</button>
+        <button class="btn" onclick="scrollToId('chart')">See the org structure</button>
+      </div>
+      <div class="subnav">
+        <a onclick="scrollToId('chart')">Org Chart</a>
+        <a onclick="scrollToId('management-board')">Management Board</a>
+        <a onclick="scrollToId('executive-board')">Executive Board</a>
+        <a onclick="scrollToId('project-teams')">Project Teams</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="chart-section" id="chart">
+    <div class="wrap">
+      <div class="chart-head">
+        <span class="eyebrow">Structure</span>
+        <h2>How A-HOUSE is organized</h2>
+        <p>One CEO, six departments, two tiers each. Tap any name below to jump straight to that role's full job description.</p>
+      </div>
+
+      <div class="org-panel">
+        <div class="org-ceo-wrap">
+          <div class="org-ceo">Chief Executive Officer</div>
+          <div class="org-ceo-sub">CEO</div>
+          <div class="org-ceo-line"></div>
+        </div>
+        <div class="org-departments" id="org-departments"></div>
+        <div class="org-members-row">
+          <div class="org-members-stem"></div>
+          <div class="org-members-node">Members</div>
+        </div>
+
+        <div class="org-project-branch">
+          <div class="org-project-stem"></div>
+          <span class="org-project-tag">Ad hoc — per project</span>
+          <button class="org-project-node" onclick="scrollToId('project-teams')">Project Teams</button>
+
+          <p class="org-project-note">Teams run in parallel — how many, and how big, depends on the drive</p>
+
+          <div class="org-project-teams">
+            <div class="org-project-team">
+              <button class="org-project-role pm" onclick="scrollToId('pm-detail')">Project Manager</button>
+              <button class="org-project-core-group" onclick="scrollToId('core-team-detail')">
+                <span class="org-project-core-label">Core Team</span>
+                <span class="org-project-core-row">
+                  <span class="org-project-core-cell"></span>
+                  <span class="org-project-core-cell"></span>
+                  <span class="org-project-core-cell"></span>
+                </span>
+              </button>
+            </div>
+            <div class="org-project-team">
+              <button class="org-project-role pm" onclick="scrollToId('pm-detail')">Project Manager</button>
+              <button class="org-project-core-group" onclick="scrollToId('core-team-detail')">
+                <span class="org-project-core-label">Core Team</span>
+                <span class="org-project-core-row">
+                  <span class="org-project-core-cell"></span>
+                  <span class="org-project-core-cell"></span>
+                  <span class="org-project-core-cell"></span>
+                </span>
+              </button>
+            </div>
+            <div class="org-project-team">
+              <button class="org-project-role pm" onclick="scrollToId('pm-detail')">Project Manager</button>
+              <button class="org-project-core-group" onclick="scrollToId('core-team-detail')">
+                <span class="org-project-core-label">Core Team</span>
+                <span class="org-project-core-row">
+                  <span class="org-project-core-cell"></span>
+                  <span class="org-project-core-cell"></span>
+                  <span class="org-project-core-cell"></span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="org-legend">
+          <span><i style="background:var(--navy);"></i> Chief — Management Board</span>
+          <span><i style="background:var(--orange);"></i> Head — Executive Board</span>
+          <span><i class="outline"></i> Project team — recruited per project</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="management-board">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Tier 01 — Live</span>
+        <h2>Management Board</h2>
+        <p>The six department Chiefs who make up A-HOUSE's C-suite, each reporting directly to the CEO and owning one department end to end.</p>
+      </div>
+      <div class="grid" id="mb-grid"></div>
+    </div>
+  </section>
+
+  <div class="wrap"><div class="divider"></div></div>
+
+  <section class="section" id="executive-board">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Tier 02 — Live</span>
+        <h2>Executive Board</h2>
+        <p>Heads run each department day-to-day and report directly to their Chief to operationalize the hub's overarching strategy.</p>
+      </div>
+      <div id="eb-departments"></div>
+    </div>
+  </section>
+
+  <div class="wrap"><div class="divider"></div></div>
+
+  <section class="section" id="project-teams">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Beyond the board</span>
+        <h2>Project Teams</h2>
+        <p>Outside the two-tier board, recruitment drives pull members from the general pool into short-term project teams — each formed around a single A-HOUSE project rather than a standing department.</p>
+      </div>
+      <div class="grid">
+        <div class="card" id="pm-detail" style="scroll-margin-top:100px;">
+          <div class="card-code">LEADS THE PROJECT</div>
+          <h3>Project Manager</h3>
+          <p class="lead">Owns the project end to end — scoping the work, assigning tasks across the Core Team, keeping the timeline on track, and reporting progress back to the relevant department Head.</p>
+        </div>
+        <div class="card" id="core-team-detail" style="scroll-margin-top:100px;">
+          <div class="card-code">STAFFS THE PROJECT</div>
+          <h3>Core Team</h3>
+          <p class="lead">Members recruited for that project specifically — however many the scope needs. They carry out the day-to-day work under the Project Manager for the duration of that one project.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section tight">
+    <div class="wrap">
+      <div class="cta">
+        <div>
+          <h3>Not sure which seat fits you?</h3>
+          <p>Reach out to the Chief Talent Officer's team — they run recruitment and can walk you through what each role actually looks like week to week.</p>
+        </div>
+        <a href="contact.html" class="btn">Get in touch</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">
+          <img class="brand-mark" src="assets/logo-icon-sm.png" alt="A-HOUSE logo">
+          <div class="foot-brand-text">Atenean Hub of Upcoming<br>Student Entrepreneurs</div>
+        </div>
+        <div class="foot-meta">Ateneo de Manila University, Loyola Heights Campus, Quezon City, PH<br><a href="mailto:ahouse.connect@gmail.com">ahouse.connect@gmail.com</a></div>
+      </div>
+      <div class="foot-links">
+        <a href="about.html">About Us</a>
+        <a href="events.html">Events</a>
+        <a href="directory.html">Role Directory</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+    <div class="foot-note">© 2026 A-HOUSE, Ateneo de Manila University.</div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/directory.js"></script>
+</body>
+</html>
