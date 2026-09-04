@@ -58,8 +58,18 @@ ul{list-style:none;}
 /* ---------- header / nav ---------- */
 header{
   position:sticky; top:0; z-index:50;
-  background:rgba(243,245,249,.92); backdrop-filter:blur(8px);
+  background:rgba(243,245,249,.92);
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
   border-bottom:1px solid var(--line);
+  /* Sticky + backdrop-filter is a known WebKit repaint bug: without its own
+     compositing layer, the blurred backdrop can briefly repaint a frame behind
+     the new scroll position, showing as a faint ghosted duplicate above the
+     header while scrolling. Promoting the header to its own layer (and
+     isolating it from the stacking context below) makes the browser recomposite
+     the blur cleanly every frame instead of reusing a stale one. */
+  transform:translateZ(0);
+  will-change:transform;
+  isolation:isolate;
 }
 .nav{
   display:flex; align-items:center; justify-content:space-between;
@@ -68,7 +78,7 @@ header{
 .brand{display:flex; align-items:center; gap:12px; cursor:pointer; text-decoration:none;}
 .brand-mark{height:30px; width:auto; flex:none;}
 .brand-text{font-family:var(--display); font-weight:700; font-size:16px; color:var(--navy); line-height:1.1;}
-.brand-sub{font-family:var(--mono); font-size:10px; color:var(--slate); letter-spacing:.06em; text-transform:uppercase;}
+.brand-sub{font-family:var(--body); font-weight:600; font-size:10px; color:var(--slate); letter-spacing:.01em; text-transform:uppercase;}
 
 nav.links{display:flex; gap:28px; align-items:center;}
 nav.links a{font-size:14px; font-weight:500; color:var(--slate); cursor:pointer; transition:.15s; text-decoration:none;}
@@ -96,8 +106,20 @@ nav.links a.active{color:var(--navy); font-weight:700;}
 header.menu-open .mobile-links{display:flex;}
 
 /* ---------- hero ---------- */
-.hero{padding:80px 0 56px;}
+.hero{padding:80px 0 56px; position:relative; overflow:hidden;}
 .hero.hero-compact{padding:56px 0 44px;}
+/* Brand motif: the A-HOUSE mark is a pitched roofline (navy fill, orange edge),
+   not a generic icon — reusing that exact silhouette as a watermark (and again
+   in the CTA banner below) is what ties the site's chrome back to the brand
+   specifically, instead of a palette that could belong to any campus org. */
+.hero::before{
+  content:"";
+  position:absolute; top:-30px; right:-70px; width:460px; height:280px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 280'%3E%3Cpath d='M-20 260 L150 50 L205 122 L238 82 L271 122 L480 260' fill='none' stroke='%2316274F' stroke-width='18' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M-20 260 L150 50 L205 122 L238 82 L271 122 L480 260' fill='none' stroke='%23B85219' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' transform='translate(-3,-3)'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-size:contain;
+  opacity:.05; pointer-events:none; z-index:0;
+}
+.hero .wrap{position:relative; z-index:1;}
 .hero h1{
   font-family:var(--display); font-weight:700;
   font-size:clamp(34px,5vw,54px); line-height:1.06;
@@ -114,7 +136,7 @@ header.menu-open .mobile-links{display:flex;}
 /* Quick jump-links row under a hero (Directory, Events, ...) */
 .subnav{display:flex; gap:10px; flex-wrap:wrap; padding-top:14px; border-top:1px solid var(--line); margin-top:28px;}
 .subnav a{
-  display:inline-block; font-family:var(--mono); font-size:12px; letter-spacing:.02em;
+  display:inline-block; font-family:var(--body); font-weight:600; font-size:13px; letter-spacing:0;
   color:var(--navy); text-decoration:none; cursor:pointer;
   background:#F1F4FA; border:1px solid var(--line);
   padding:7px 14px; border-radius:999px; transition:.15s ease;
@@ -237,10 +259,13 @@ header.menu-open .mobile-links{display:flex;}
   display:flex; justify-content:space-between; align-items:center; gap:24px; flex-wrap:wrap;
   position:relative; overflow:hidden;
 }
+/* Same roofline silhouette as the hero watermark, not a blurred gradient blob —
+   the brand's own mark doubling as the banner's corner accent. */
 .cta::after{
-  content:""; position:absolute; right:-60px; top:-60px; width:220px; height:220px;
-  border-radius:50%; background:linear-gradient(135deg, var(--orange), var(--amber));
-  opacity:.25; filter:blur(10px);
+  content:""; position:absolute; right:-30px; top:-26px; width:260px; height:160px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 280'%3E%3Cpath d='M-20 260 L150 50 L205 122 L238 82 L271 122 L480 260' fill='none' stroke='%23F0A64C' stroke-width='18' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-size:contain;
+  opacity:.22; pointer-events:none;
 }
 .cta h3{font-family:var(--display); font-size:24px; color:#fff; max-width:420px; position:relative;}
 .cta p{color:#B9C3DC; margin-top:8px; font-size:14px; position:relative;}
@@ -523,15 +548,32 @@ footer .wrap{padding:56px 28px 32px;}
   .foot-top, .foot-bottom{flex-direction:column; align-items:flex-start;}
 
   /* Subnav pills: scroll horizontally instead of wrapping to several rows.
-     The mask fades the last visible pill so it visibly hints "more to scroll". */
+     Two affordances that the pill row is scrollable: a wider fade on the
+     trailing edge (the old 90% cutoff was too close to full-opacity to read
+     against the near-identical pill/page colors), plus a small sticky chevron
+     badge that rides the right edge of the visible row — it stays pinned
+     while there's more to scroll, then settles into normal flow right after
+     the last pill once you've scrolled all the way, so it self-hides exactly
+     when it's no longer needed. */
   .subnav{
+    position:relative;
     flex-wrap:nowrap; overflow-x:auto; scroll-behavior:smooth;
     scrollbar-width:none; -ms-overflow-style:none;
-    -webkit-mask-image:linear-gradient(to right, #000 90%, transparent 100%);
-    mask-image:linear-gradient(to right, #000 90%, transparent 100%);
+    -webkit-mask-image:linear-gradient(to right, #000 78%, transparent 100%);
+    mask-image:linear-gradient(to right, #000 78%, transparent 100%);
   }
   .subnav::-webkit-scrollbar{display:none;}
   .subnav a{flex:0 0 auto; white-space:nowrap;}
+  .subnav::after{
+    content:"›";
+    flex:0 0 auto; align-self:center;
+    position:sticky; right:2px;
+    width:22px; height:22px; margin-left:2px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:50%; background:var(--navy); color:#fff;
+    font-family:var(--body); font-weight:700; font-size:13px; line-height:1;
+    pointer-events:none;
+  }
 }
 
 /* ---------- photo carousel ---------- */
