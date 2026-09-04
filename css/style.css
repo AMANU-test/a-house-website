@@ -590,6 +590,94 @@ footer .wrap{padding:56px 28px 32px;}
   .cap-title{font-size:13px;}
 }
 
+/* Prev/next: reuses the site's existing border-corner chevron (see .chev),
+   just bigger and rotated to point sideways. Generic — used by any carousel
+   variant that opts in with these two buttons in its markup. */
+.carousel-arrow{
+  position:absolute; top:50%; translate:0 -50%; z-index:5;
+  width:40px; height:40px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(9,15,32,.45); border:1px solid rgba(255,255,255,.28);
+  cursor:pointer; transition:.15s ease;
+}
+.carousel-arrow:hover{background:rgba(9,15,32,.72); border-color:rgba(255,255,255,.5);}
+.carousel-arrow::before{
+  content:""; width:8px; height:8px;
+  border-right:2px solid #fff; border-bottom:2px solid #fff;
+}
+.carousel-arrow.prev{left:16px;}
+.carousel-arrow.prev::before{transform:rotate(135deg); margin-left:3px;}
+.carousel-arrow.next{right:16px;}
+.carousel-arrow.next::before{transform:rotate(-45deg); margin-right:3px;}
+
+/* ---------- home hero: rotating page showcase ---------- */
+/* Same carousel engine as the photo carousels above (native scroll-snap,
+   numbered-tabs-turned-dots, auto-advance), but each slide is a full page
+   intro instead of an image — reusing that page's own eyebrow/h1/p rather
+   than separate marketing copy. One constant illustration sits behind every
+   slide (outside .carousel-track, so it doesn't scroll away) — a roofline
+   rendered as a small node-and-line network, tying the "hub that connects
+   founders" idea to the same pitched-roof silhouette used elsewhere on the
+   site, rather than a generic stock illustration. */
+.hero-carousel{
+  position:relative; overflow:hidden;
+  height:min(620px, 88vh);
+  background:linear-gradient(135deg, var(--navy) 0%, #1B2E5C 48%, #2A2154 100%);
+}
+.hero-carousel .carousel-track{height:100%;}
+.hero-carousel .carousel-slide{display:flex; align-items:center; height:100%;}
+.hero-carousel-art{
+  position:absolute; right:-40px; top:50%; translate:0 -50%; z-index:1;
+  width:44%; max-width:520px; pointer-events:none;
+}
+/* Not .wrap — a flex item with margin:auto centers itself in the slide
+   instead of hugging the left edge. This computes the same left inset .wrap
+   uses elsewhere (28px, plus whatever centers a 1120px column past that
+   width) so the headline still lines up with the header logo and every
+   other section's left edge. */
+.hc-content{
+  position:relative; z-index:2; max-width:600px;
+  padding-left:max(28px, calc((100vw - 1120px) / 2 + 28px)); padding-right:28px;
+}
+.hc-content .eyebrow{color:var(--amber);}
+.hc-content h1{
+  margin-top:14px; font-family:var(--display); font-weight:700; color:#fff;
+  font-size:clamp(32px, 4.4vw, 50px); line-height:1.1; letter-spacing:-.01em;
+}
+.hc-content h1 em{font-style:normal; color:var(--amber);}
+.hc-content p{margin-top:18px; font-size:16px; color:#C7CFE6; max-width:480px;}
+.hc-actions{display:flex; gap:14px; margin-top:30px; flex-wrap:wrap;}
+.hero-carousel .btn.solid{background:#fff; color:var(--navy); border-color:#fff;}
+.hero-carousel .btn.solid:hover{background:var(--amber); border-color:var(--amber); color:var(--navy);}
+.hero-carousel .btn:not(.solid){border-color:rgba(255,255,255,.5); color:#fff;}
+.hero-carousel .btn:not(.solid):hover{background:rgba(255,255,255,.12);}
+.hero-carousel .carousel-tabs{
+  left:50%; right:auto; bottom:24px; translate:-50% 0; gap:7px;
+}
+/* Left-aligned text of varying length (a one-line "Let's talk." vs a full
+   paragraph) means a vertically-centered side arrow will collide with
+   *some* slide's copy sooner or later — flanking the dot row at the bottom
+   keeps the arrows clear of every slide's text regardless of length. */
+.hero-carousel .carousel-arrow{top:auto; bottom:16px; translate:0;}
+.hero-carousel .carousel-arrow.prev{left:auto; right:calc(50% + 46px);}
+.hero-carousel .carousel-arrow.next{left:calc(50% + 46px); right:auto;}
+.hero-carousel .carousel-tabs button{
+  width:7px; height:7px; padding:0; border-radius:999px; background:rgba(255,255,255,.35);
+  font-size:0; line-height:0; color:transparent; overflow:hidden;
+  transition:width .2s ease, background .2s ease;
+}
+.hero-carousel .carousel-tabs button::after{display:none;}
+.hero-carousel .carousel-tabs button.active{width:20px; background:#fff;}
+@media (max-width: 1024px){
+  .hero-carousel-art{display:none;}
+}
+@media (max-width: 640px){
+  .hero-carousel{height:min(560px, 92vh);}
+  .carousel-arrow{width:34px; height:34px;}
+  .carousel-arrow.prev{left:10px;}
+  .carousel-arrow.next{right:10px;}
+}
+
 /* ---------- placeholder carousel slides (no real photo yet) ---------- */
 .carousel-placeholder{
   width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;

@@ -48,17 +48,82 @@
 
 <main>
 
-  <section class="hero hero-compact">
-    <div class="wrap">
-      <span class="eyebrow">Atenean Hub of Upcoming Student Entrepreneurs</span>
-      <h1 style="margin-top:14px;">Where Ateneo students turn<br>ideas into <em>startups.</em></h1>
-      <p>A-HOUSE is the Loyola Schools' home for aspiring founders — mentorship, industry access, and a community built to help you go from idea to venture.</p>
-      <div class="hero-actions">
-        <a class="btn solid" href="events.html">See upcoming events</a>
-        <!-- Placeholder — swap href for the real member sign-up form link once it's ready. -->
-        <a class="btn" href="#" target="_blank" rel="noopener">Become a member</a>
+  <!-- Rotating showcase of the site's own sections — each slide reuses that
+       page's real eyebrow/h1/p rather than inventing separate marketing copy,
+       so this stays accurate as those pages change. Home leads since it's the
+       site's own identity statement; the rest follow header nav order. -->
+  <section class="hero-carousel" data-carousel>
+    <svg class="hero-carousel-art" viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <radialGradient id="hcGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#F0A64C" stop-opacity=".32"/>
+          <stop offset="100%" stop-color="#F0A64C" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <circle cx="290" cy="260" r="220" fill="url(#hcGlow)"/>
+      <path d="M40 400 L180 140 L250 250 L300 170 L350 250 L480 400" fill="none" stroke="#7C96D9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>
+      <path d="M38 398 L178 138 L248 248 L298 168 L348 248 L478 398" fill="none" stroke="#F0A64C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+      <path d="M180 140 L300 170 M250 250 L350 250" stroke="#7C96D9" stroke-width="1" opacity=".5"/>
+      <g fill="#F0A64C"><circle cx="180" cy="140" r="5"/><circle cx="300" cy="170" r="4"/></g>
+      <g fill="#fff"><circle cx="250" cy="250" r="4"/><circle cx="350" cy="250" r="4"/><circle cx="40" cy="400" r="3"/><circle cx="480" cy="400" r="3"/></g>
+    </svg>
+    <div class="carousel-track">
+      <div class="carousel-slide">
+        <div class="hc-content">
+          <span class="eyebrow">Atenean Hub of Upcoming Student Entrepreneurs</span>
+          <h1>Where Ateneo students turn<br>ideas into <em>startups.</em></h1>
+          <p>A-HOUSE is the Loyola Schools' home for aspiring founders — mentorship, industry access, and a community built to help you go from idea to venture.</p>
+          <div class="hc-actions">
+            <a class="btn solid" href="events.html">See upcoming events</a>
+            <!-- Placeholder — swap href for the real member sign-up form link once it's ready. -->
+            <a class="btn" href="#" target="_blank" rel="noopener">Become a member</a>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-slide">
+        <div class="hc-content">
+          <span class="eyebrow">About Us</span>
+          <h1>Building Ateneo's<br><em>entrepreneurial ecosystem.</em></h1>
+          <p>We, the members of A-HOUSE, are united by our passion for entrepreneurship and startups, and guided by the principles of integrity, innovation, and community service.</p>
+          <div class="hc-actions">
+            <a class="btn solid" href="about.html">Meet A-HOUSE →</a>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-slide">
+        <div class="hc-content">
+          <span class="eyebrow">Events</span>
+          <h1>Workshops, talks,<br>and <em>pitch nights.</em></h1>
+          <p>From flagship competitions to hands-on founder workshops — this is where A-HOUSE brings its mission to life.</p>
+          <div class="hc-actions">
+            <a class="btn solid" href="events.html">See upcoming events →</a>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-slide">
+        <div class="hc-content">
+          <span class="eyebrow">Role Directory</span>
+          <h1>Get to know the role<br>before you <em>apply.</em></h1>
+          <p>Find out where you'd fit on the board! Here's every officer position in A-HOUSE, along with the expected responsibilities and skills needed.</p>
+          <div class="hc-actions">
+            <a class="btn solid" href="directory.html">View the directory →</a>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-slide">
+        <div class="hc-content">
+          <span class="eyebrow">Contact</span>
+          <h1>Let's talk.</h1>
+          <p>Questions about membership, partnerships, or events — reach out and the right team will get back to you.</p>
+          <div class="hc-actions">
+            <a class="btn solid" href="contact.html">Get in touch →</a>
+          </div>
+        </div>
       </div>
     </div>
+    <button class="carousel-arrow prev" aria-label="Previous slide"></button>
+    <button class="carousel-arrow next" aria-label="Next slide"></button>
+    <div class="carousel-tabs"></div>
   </section>
 
   <div class="wrap"><div class="divider"></div></div>
