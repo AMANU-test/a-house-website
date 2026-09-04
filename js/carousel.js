@@ -2,11 +2,20 @@
 // numbered tab to jump to a slide, and it auto-advances when left alone —
 // pausing the moment someone touches or scrolls it manually, then resuming
 // a beat after they stop. Works off data-carousel root.
+//
+// data-no-autoplay opts a carousel out of the auto-advance entirely (arrows/
+// tabs/swipe still work). Photo carousels are fine to auto-rotate — there's
+// nothing to read, just look at. A carousel whose slides carry real reading
+// content and their own distinct destination (the home hero) isn't: reading
+// a headline and paragraph before deciding to click reliably takes longer
+// than a 5s interval, so the slide — and the link under the cursor — can
+// change out from under someone mid-click, landing them on the wrong page.
 (function () {
   document.querySelectorAll('[data-carousel]').forEach(function (root) {
     const track = root.querySelector('.carousel-track');
     const realSlides = Array.from(track.children);
     const count = realSlides.length;
+    const autoplay = !root.hasAttribute('data-no-autoplay');
 
     // Clone slide 01 onto the end. Scrolling (or auto-advancing) past the last
     // real slide lands here first — visually identical to slide 01 — then we
@@ -54,6 +63,7 @@
     }
 
     function restart() {
+      if (!autoplay) return;
       if (timer) clearInterval(timer);
       timer = setInterval(next, 5000);
     }

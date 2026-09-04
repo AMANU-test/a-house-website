@@ -36,7 +36,7 @@ function toggleTier(containerId, btnId){
         otherBtn.classList.remove('open');
         document.getElementById(t.containerId).classList.add('tier-hidden');
         otherBtn.setAttribute('aria-expanded', 'false');
-        otherBtn.querySelector('.tier-toggle-label').textContent = 'Show';
+        otherBtn.querySelector('.tier-toggle-label').textContent = 'Learn more';
       }
     });
   }
@@ -44,7 +44,7 @@ function toggleTier(containerId, btnId){
   const isOpen = btn.classList.toggle('open');
   container.classList.toggle('tier-hidden', !isOpen);
   btn.setAttribute('aria-expanded', String(isOpen));
-  btn.querySelector('.tier-toggle-label').textContent = isOpen ? 'Hide' : 'Show';
+  btn.querySelector('.tier-toggle-label').textContent = isOpen ? 'Hide' : 'Learn more';
 }
 
 /* If a chart node's card lives inside a collapsed tier, open that tier first —
@@ -418,7 +418,7 @@ function cardTemplate(role, opts){
   const dateLabel = opts.dateLabel || '';
   const deptLabel = opts.deptLabel || '';
   return `
-    <div class="card" id="card-${role.slug}">
+    <div class="card ${codeClass}" id="card-${role.slug}">
       <div class="card-top">
         <span class="card-code ${codeClass}">${codeLabel}</span>
         ${dateLabel ? `<span class="card-date">${dateLabel}</span>` : ''}

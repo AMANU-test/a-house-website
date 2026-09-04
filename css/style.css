@@ -184,6 +184,17 @@ header.menu-open .mobile-links{display:flex;}
 .card:hover{border-color:var(--navy-light); box-shadow:0 6px 20px -10px rgba(22,39,79,.25);}
 .card.open{border-color:var(--navy);}
 .card.clickable{cursor:pointer;}
+/* JD cards tinted by tier, matching the org chart above (Chief=navy,
+   Head=orange, Lead=amber) — same class names (.chief/.head/.lead) the org
+   chart's own nodes already use, so a role's card and its org-chart box read
+   as the same thing. A light tint, not a solid fill — JD content is body
+   text (lists, skill tags), which needs the contrast a solid navy/orange
+   background would fight; a plain hex fallback covers browsers without
+   color-mix() (declared first, so it's simply overridden where supported,
+   never used alongside it). */
+.card.chief{background:#EEF1F8; background:color-mix(in srgb, var(--navy) 6%, white);}
+.card.head{background:#FBEEE7; background:color-mix(in srgb, var(--orange) 7%, white);}
+.card.lead{background:#FDF3E6; background:color-mix(in srgb, var(--amber) 12%, white);}
 
 .card-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
 .card-code{font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--orange);}
@@ -245,16 +256,6 @@ header.menu-open .mobile-links{display:flex;}
   background:var(--navy); border-radius:20px; padding:52px 44px;
   display:flex; justify-content:space-between; align-items:center; gap:24px; flex-wrap:wrap;
   position:relative; overflow:hidden;
-}
-/* The A-HOUSE mark is a pitched roofline (navy fill, orange edge), not a
-   generic icon — reusing that exact silhouette as the banner's corner accent
-   is what ties this back to the brand specifically, instead of a blurred
-   gradient blob that could belong to any campus org or SaaS product. */
-.cta::after{
-  content:""; position:absolute; right:-30px; top:-26px; width:260px; height:160px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 460 280'%3E%3Cpath d='M-20 260 L150 50 L205 122 L238 82 L271 122 L480 260' fill='none' stroke='%23F0A64C' stroke-width='18' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat; background-size:contain;
-  opacity:.22; pointer-events:none;
 }
 .cta h3{font-family:var(--display); font-size:24px; color:#fff; max-width:420px; position:relative;}
 .cta p{color:#B9C3DC; margin-top:8px; font-size:14px; position:relative;}
@@ -385,18 +386,27 @@ footer .wrap{padding:56px 28px 32px;}
   height:1px; background:var(--line);
 }
 .org-tracks-stem{width:1px; height:24px; background:var(--line); margin:0 auto;}
+/* Member Pool as an actual node sitting on the line — same treatment as the
+   CEO node at the top of the chart, so the diagram reads as bookended (one
+   root feeding down into six departments, one root every department's Teams
+   feed back into) instead of a small corner label easy to miss. */
+.org-tracks-node{
+  align-self:center; position:relative;
+  background:var(--navy); color:#fff; font-family:var(--display); font-weight:700;
+  font-size:13px; padding:10px 24px; border-radius:10px; text-align:center;
+}
+.org-tracks-node::after{
+  content:""; position:absolute; left:50%; top:100%; width:1px; height:16px;
+  background:var(--line); transform:translateX(-50%);
+}
 /* One bordered container around both tracks — rather than a text label — is
    what says "these two are equally the member pool": a shared boundary reads
-   as one group without needing a separate node above them. Full width to
+   as one group without needing a separate label above them. Full width to
    match the department grid above (not a small floating box), with the full
    track explanations inline so the chart is self-contained. */
 .org-tracks-pool{
   margin-top:16px; border:1px solid var(--line); border-radius:14px; background:#FAFBFD;
-  padding:20px 24px 24px;
-}
-.org-tracks-pool-label{
-  font-family:var(--mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.06em;
-  color:var(--slate-soft); margin-bottom:14px;
+  padding:24px;
 }
 /* Stacked (not side by side) with Managerial Track on top — it's the one that
    feeds back up into the Teams tier, so it sits closer to that upward path;
