@@ -331,13 +331,16 @@ footer .wrap{padding:56px 28px 32px;}
 .org-node.head{background:var(--orange);}
 
 /* Department Teams is a confirmed tier, same as Chief/Head — solid fill, not
-   the light cream-and-border look it had while still a draft. Dark amber
-   (#8A5A16, not --amber) because --amber is too light for white text to clear
-   AA contrast; #8A5A16 on white is 5.9:1. Can hold 2-3 boxes per department
-   (Innovations has none yet), so it's a stack of chips rather than a
-   full-width block like Chief/Head. Sized close to Head's box (not the tiny
-   chip it started as) and labeled with the team's name, not the Lead's title,
-   so each one reads as a group of people, not one person.
+   the light cream-and-border look it had while still a draft. --amber itself
+   (not a darkened one-off hex) with navy text, not white — amber is too
+   light for white text to clear AA contrast, but plenty dark enough to carry
+   navy text, so the fix is the text color, not inventing an off-palette
+   brown that no longer reads as "the same accent" as the spine lines beside
+   it. Can hold 2-3 boxes per department (Innovations has none yet), so it's
+   a stack of chips rather than a full-width block like Chief/Head. Sized
+   close to Head's box (not the tiny chip it started as) and labeled with the
+   team's name, not the Lead's title, so each one reads as a group of
+   people, not one person.
 
    There's no width to lay 2-3 Leads out side by side the way Chief/Head's
    siblings are (CEO -> 6 departments), so a stack is the only option — but a
@@ -352,13 +355,13 @@ footer .wrap{padding:56px 28px 32px;}
 .org-dept-leads{display:flex; flex-direction:column; gap:9px; padding-left:11px; position:relative;}
 .org-dept-leads::before{content:""; position:absolute; left:0; top:6px; bottom:6px; width:1px; background:var(--amber);}
 .org-node.lead{
-  flex:1 1 auto; min-height:0; padding:10px 12px; font-size:11.5px; font-weight:600; line-height:1.3;
-  background:#8A5A16; color:#fff; position:relative;
+  flex:1 1 auto; min-height:0; padding:10px 12px; font-size:11.5px; font-weight:700; line-height:1.3;
+  background:var(--amber); color:var(--navy); position:relative;
 }
 .org-node.lead::before{
   content:""; position:absolute; left:-11px; top:50%; width:11px; height:1px; background:var(--amber);
 }
-.org-node.lead:hover{box-shadow:0 4px 12px -4px rgba(138,90,22,.35);}
+.org-node.lead:hover{box-shadow:0 4px 12px -4px rgba(240,166,76,.5);}
 
 /* ---------- org chart: member tracks branch ---------- */
 /* Replaces the old standalone "Members" node — everything above (all
@@ -391,15 +394,15 @@ footer .wrap{padding:56px 28px 32px;}
    above (one parent, equal children, rotated 90° since there's no width to
    lay them out side by side) so the two visibly read as siblings, not a rank. */
 .org-tracks{display:flex; flex-direction:column; gap:10px; padding-left:14px; position:relative;}
-.org-tracks::before{content:""; position:absolute; left:0; top:10px; bottom:10px; width:1px; background:#E3B876;}
+.org-tracks::before{content:""; position:absolute; left:0; top:10px; bottom:10px; width:1px; background:var(--amber);}
 .org-track{
-  position:relative; background:#FDF1DC; border:1px solid #E3B876; border-radius:10px;
+  position:relative; background:var(--card); border:1px solid var(--line); border-radius:10px;
   padding:14px 20px;
 }
 .org-track::before{
-  content:""; position:absolute; left:-14px; top:24px; width:14px; height:1px; background:#E3B876;
+  content:""; position:absolute; left:-14px; top:24px; width:14px; height:1px; background:var(--amber);
 }
-.org-track-name{font-family:var(--mono); font-weight:700; font-size:12.5px; letter-spacing:.03em; color:#8A5A16;}
+.org-track-name{font-family:var(--mono); font-weight:700; font-size:12.5px; letter-spacing:.03em; color:var(--orange);}
 .org-track-sub{font-family:var(--mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.03em; color:var(--slate-soft); margin-top:2px;}
 .org-track-quote{font-size:13px; color:var(--ink); font-style:italic; margin-top:9px; line-height:1.55; max-width:640px;}
 .org-track-note{font-family:var(--mono); font-size:10.5px; color:var(--slate); margin-top:8px;}
