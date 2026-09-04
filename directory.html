@@ -124,13 +124,15 @@
         <span class="eyebrow">Tier 01 — Live</span>
         <div class="tier-title-row">
           <h2>Management Board</h2>
-          <button class="tier-toggle" id="mb-toggle" onclick="toggleTier('mb-grid','mb-toggle')" aria-expanded="false">
+          <button class="tier-toggle" id="mb-toggle" onclick="toggleTier('mb-grid-wrap','mb-toggle')" aria-expanded="false">
             <span class="chev"></span><span class="tier-toggle-label">Show</span>
           </button>
         </div>
-        <p>The six department Chiefs who make up A-HOUSE's C-suite, each reporting directly to the CEO and owning one department end to end. Tap a name in the org chart above, or Show, to see the full role.</p>
+        <p>The six department Chiefs who make up A-HOUSE's C-suite, each reporting directly to the CEO and owning one department end to end.</p>
       </div>
-      <div class="grid tier-hidden" id="mb-grid"></div>
+      <div class="tier-anim tier-hidden" id="mb-grid-wrap">
+        <div class="grid" id="mb-grid"></div>
+      </div>
     </div>
   </section>
 
@@ -142,13 +144,15 @@
         <span class="eyebrow">Tier 02 — Live</span>
         <div class="tier-title-row">
           <h2>Executive Board</h2>
-          <button class="tier-toggle" id="eb-toggle" onclick="toggleTier('eb-departments','eb-toggle')" aria-expanded="false">
+          <button class="tier-toggle" id="eb-toggle" onclick="toggleTier('eb-departments-wrap','eb-toggle')" aria-expanded="false">
             <span class="chev"></span><span class="tier-toggle-label">Show</span>
           </button>
         </div>
-        <p>Heads run each department day-to-day and report directly to their Chief to operationalize the hub's overarching strategy. Tap a name in the org chart above, or Show, to see the full role.</p>
+        <p>Heads run each department day-to-day and report directly to their Chief to operationalize the hub's overarching strategy.</p>
       </div>
-      <div id="eb-departments" class="tier-hidden"></div>
+      <div class="tier-anim tier-hidden" id="eb-departments-wrap">
+        <div id="eb-departments"></div>
+      </div>
     </div>
   </section>
 
@@ -160,13 +164,15 @@
         <span class="eyebrow">Tier 03 — Live</span>
         <div class="tier-title-row">
           <h2>Department Teams</h2>
-          <button class="tier-toggle" id="tl-toggle" onclick="toggleTier('tl-departments','tl-toggle')" aria-expanded="false">
+          <button class="tier-toggle" id="tl-toggle" onclick="toggleTier('tl-departments-wrap','tl-toggle')" aria-expanded="false">
             <span class="chev"></span><span class="tier-toggle-label">Show</span>
           </button>
         </div>
-        <p>Leads run one team's slice of the work under a Head, and report directly to them. Tap a team in the org chart above, or Show, then a department below, to see its Leads.</p>
+        <p>Leads run one team's slice of the work under a Head, and report directly to them.</p>
       </div>
-      <div id="tl-departments" class="tier-hidden"></div>
+      <div class="tier-anim tier-hidden" id="tl-departments-wrap">
+        <div id="tl-departments"></div>
+      </div>
     </div>
   </section>
 
@@ -178,24 +184,26 @@
         <span class="eyebrow">Beyond the board</span>
         <div class="tier-title-row">
           <h2>Members</h2>
-          <button class="tier-toggle" id="mt-toggle" onclick="toggleTier('tracks-stack','mt-toggle')" aria-expanded="false">
+          <button class="tier-toggle" id="mt-toggle" onclick="toggleTier('tracks-stack-wrap','mt-toggle')" aria-expanded="false">
             <span class="chev"></span><span class="tier-toggle-label">Show</span>
           </button>
         </div>
-        <p>Every A-HOUSE member falls into one of two tracks — shown in full in the org chart above, or Show below.</p>
+        <p>Every A-HOUSE member falls into one of two tracks.</p>
       </div>
-      <div class="tracks-stack tier-hidden" id="tracks-stack">
-        <div class="card">
-          <div class="card-code">MANAGERIAL TRACK</div>
-          <h3>Managerial Member · Open to Tapping</h3>
-          <p class="lead">"I want all the perks of attending events PLUS hands-on experience planning projects, managing operations, marketing, or securing partnerships."</p>
-          <div class="card-meta">Applies directly to a department's Team, above.</div>
-        </div>
-        <div class="card">
-          <div class="card-code">COMMUNITY TRACK</div>
-          <h3>General Member</h3>
-          <p class="lead">"I want to attend events, network, learn about startups, and find potential co-founders."</p>
-          <div class="card-meta">Open to every A-HOUSE member — no application beyond standard membership. Just show up.</div>
+      <div class="tier-anim tier-hidden" id="tracks-stack-wrap">
+        <div class="tracks-stack" id="tracks-stack">
+          <div class="card">
+            <div class="card-code">MANAGERIAL TRACK</div>
+            <h3>Managerial Member · Open to Tapping</h3>
+            <p class="lead">"I want all the perks of attending events PLUS hands-on experience planning projects, managing operations, marketing, or securing partnerships."</p>
+            <div class="card-meta">Applies directly to a department's Team, above.</div>
+          </div>
+          <div class="card">
+            <div class="card-code">COMMUNITY TRACK</div>
+            <h3>General Member</h3>
+            <p class="lead">"I want to attend events, network, learn about startups, and find potential co-founders."</p>
+            <div class="card-meta">Open to every A-HOUSE member — no application beyond standard membership. Just show up.</div>
+          </div>
         </div>
       </div>
     </div>

@@ -139,11 +139,22 @@ header.menu-open .mobile-links{display:flex;}
 .tier-toggle .chev{width:8px; height:8px; border-right:1.5px solid var(--navy); border-bottom:1.5px solid var(--navy); transform:rotate(45deg); transition:.2s ease;}
 .tier-toggle.open .chev{transform:rotate(-135deg);}
 
-/* #mb-grid already carries class="grid" (display:grid), which — being an
-   author-stylesheet rule — overrides the browser's own [hidden]{display:none}
-   default, so toggling the hidden attribute alone silently did nothing for
-   Management Board. !important guarantees this wins regardless. */
-.tier-hidden{display:none !important;}
+/* Slides open/shut instead of just appearing, via the CSS grid-rows trick:
+   animating grid-template-rows between 0fr and 1fr reveals a child's true
+   auto height, not a guessed max-height ceiling. A guessed ceiling is
+   exactly what clipped nested accordion content earlier on this same page
+   (see .tl-dept-group above) — Department Teams alone can have every
+   department's accordion open plus several role cards expanded at once, so
+   there's no safe fixed number here either. This wraps the real container
+   (#mb-grid, #eb-departments, #tl-departments, #tracks-stack all keep their
+   own ids and classes unchanged) rather than replacing it, so none of the
+   render/toggle JS needs to know layout height at all. */
+.tier-anim{
+  display:grid; grid-template-rows:1fr; opacity:1;
+  transition:grid-template-rows .45s cubic-bezier(.4,0,.2,1), opacity .3s ease;
+}
+.tier-anim > *{overflow:hidden; min-height:0;}
+.tier-anim.tier-hidden{grid-template-rows:0fr; opacity:0;}
 
 .divider{height:1px; background:var(--line); margin:0;}
 
