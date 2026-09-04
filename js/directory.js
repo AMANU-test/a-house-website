@@ -6,10 +6,10 @@
    click (ensureTierVisible) and to close the other three whenever one opens
    (toggleTier), so only one is ever showing at a time. */
 const ALL_TIERS = [
-  {containerId:'mb-grid', btnId:'mb-toggle'},
-  {containerId:'eb-departments', btnId:'eb-toggle'},
-  {containerId:'tl-departments', btnId:'tl-toggle'},
-  {containerId:'tracks-stack', btnId:'mt-toggle'}
+  {containerId:'mb-grid-wrap', btnId:'mb-toggle'},
+  {containerId:'eb-departments-wrap', btnId:'eb-toggle'},
+  {containerId:'tl-departments-wrap', btnId:'tl-toggle'},
+  {containerId:'tracks-stack-wrap', btnId:'mt-toggle'}
 ];
 
 /* Collapse/expand one of the four tiers above. All four start hidden on page
@@ -18,10 +18,11 @@ const ALL_TIERS = [
    button. Opening one closes whichever of the other three was open, so they
    behave as a single exclusive group rather than four independent switches.
 
-   Uses a class rather than the native `hidden` attribute — #mb-grid already
-   carries class="grid" (display:grid), and that author rule overrides the
-   browser's own [hidden]{display:none} default, which is why the Management
-   Board toggle did nothing. .tier-hidden{display:none!important} always wins. */
+   Each container here is a *-wrap element (see .tier-anim in style.css) that
+   wraps the real content (#mb-grid, #eb-departments, etc., unchanged) —
+   toggling .tier-hidden on the wrapper animates a CSS grid-rows transition
+   between the wrapper's true content height and 0, so Show/Hide slides
+   instead of snapping. */
 function toggleTier(containerId, btnId){
   const container = document.getElementById(containerId);
   const btn = document.getElementById(btnId);
