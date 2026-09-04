@@ -34,6 +34,18 @@
     }
     const tabs = Array.from(tabsWrap.children);
 
+    // Arrow buttons are optional — only the hero-style carousel on the home
+    // page has them (see .carousel-arrow in style.css). goTo/next below
+    // already restart the auto-advance timer via the track's own scroll
+    // listener, so an arrow click is treated the same as a tab click.
+    const prevBtn = root.querySelector('.carousel-arrow.prev');
+    const nextBtn = root.querySelector('.carousel-arrow.next');
+    if (prevBtn) prevBtn.addEventListener('click', function () {
+      const i = rawIndex();
+      goTo(i === 0 ? count - 1 : i - 1);
+    });
+    if (nextBtn) nextBtn.addEventListener('click', next);
+
     function rawIndex() {
       return Math.round(track.scrollLeft / track.clientWidth);
     }

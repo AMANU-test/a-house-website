@@ -590,6 +590,72 @@ footer .wrap{padding:56px 28px 32px;}
   .cap-title{font-size:13px;}
 }
 
+/* ---------- hero-style event carousel (home page) ---------- */
+/* Same real event photos as everywhere else on the site — the drama comes
+   from staging them like a hero moment (taller frame, a scrim strong enough
+   to carry big display type, each event's own name as the headline) rather
+   than from a stock illustration standing in for the content. Scoped as a
+   modifier on the existing .carousel/.has-caption component so the plain
+   carousels on the Events page are untouched. */
+.carousel-hero{aspect-ratio:16/8.5; box-shadow:0 30px 60px -28px rgba(11,18,38,.55);}
+.carousel-hero .carousel-slide::before{
+  content:""; position:absolute; inset:0; z-index:2;
+  background:
+    linear-gradient(0deg, rgba(9,15,32,.94) 0%, rgba(9,15,32,.25) 52%, rgba(9,15,32,0) 82%),
+    linear-gradient(100deg, rgba(9,15,32,.6) 0%, rgba(9,15,32,0) 58%);
+}
+.carousel-hero .carousel-caption{
+  position:absolute; left:0; right:0; bottom:0; z-index:4;
+  background:none; display:block; padding:28px 84px 26px 28px; max-width:640px;
+}
+.carousel-hero .cap-date{
+  display:block; font-size:11.5px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--amber); margin-bottom:8px;
+}
+.carousel-hero .cap-title{
+  display:block; white-space:normal; overflow:visible; text-overflow:clip;
+  font-family:var(--display); font-weight:700; letter-spacing:-.01em; text-wrap:balance;
+  font-size:clamp(22px, 3.6vw, 36px); line-height:1.1; color:#fff;
+}
+/* Prev/next: reuses the site's existing border-corner chevron (see .chev)
+   rather than a new icon, just bigger and rotated to point sideways. */
+.carousel-arrow{
+  position:absolute; top:50%; translate:0 -50%; z-index:5;
+  width:40px; height:40px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(9,15,32,.45); border:1px solid rgba(255,255,255,.28);
+  cursor:pointer; transition:.15s ease;
+}
+.carousel-arrow:hover{background:rgba(9,15,32,.72); border-color:rgba(255,255,255,.5);}
+.carousel-arrow::before{
+  content:""; width:8px; height:8px;
+  border-right:2px solid #fff; border-bottom:2px solid #fff;
+}
+.carousel-arrow.prev{left:16px;}
+.carousel-arrow.prev::before{transform:rotate(135deg); margin-left:3px;}
+.carousel-arrow.next{right:16px;}
+.carousel-arrow.next::before{transform:rotate(-45deg); margin-right:3px;}
+/* Dot strip, centered — the numbered mono tabs elsewhere read as a tag/label;
+   here they'd compete with the headline, so this variant collapses each tab
+   button down to a plain dot that widens when active. */
+.carousel-hero .carousel-tabs{
+  left:50%; right:auto; bottom:16px; translate:-50% 0; gap:7px;
+}
+.carousel-hero .carousel-tabs button{
+  width:7px; height:7px; padding:0; border-radius:999px; background:rgba(255,255,255,.4);
+  font-size:0; line-height:0; color:transparent; overflow:hidden;
+  transition:width .2s ease, background .2s ease;
+}
+.carousel-hero .carousel-tabs button::after{display:none;}
+.carousel-hero .carousel-tabs button.active{width:20px; background:#fff;}
+@media (max-width: 640px){
+  .carousel-hero{aspect-ratio:4/5.2;}
+  .carousel-hero .carousel-caption{padding:24px 20px 22px;}
+  .carousel-arrow{width:34px; height:34px;}
+  .carousel-arrow.prev{left:10px;}
+  .carousel-arrow.next{right:10px;}
+}
+
 /* ---------- placeholder carousel slides (no real photo yet) ---------- */
 .carousel-placeholder{
   width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
