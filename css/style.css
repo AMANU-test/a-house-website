@@ -611,24 +611,25 @@ footer .wrap{padding:56px 28px 32px;}
 .carousel-arrow.next::before{transform:rotate(-45deg); margin-right:3px;}
 
 /* ---------- home hero: rotating page showcase ---------- */
-/* Same carousel engine as the photo carousels above (native scroll-snap,
-   numbered-tabs-turned-dots, auto-advance), but each slide is a full page
-   intro instead of an image — reusing that page's own eyebrow/h1/p rather
-   than separate marketing copy. One constant illustration sits behind every
-   slide (outside .carousel-track, so it doesn't scroll away) — a roofline
-   rendered as a small node-and-line network, tying the "hub that connects
-   founders" idea to the same pitched-roof silhouette used elsewhere on the
-   site, rather than a generic stock illustration. */
+/* Same carousel engine as the photo carousels elsewhere on the site (native
+   scroll-snap, numbered-tabs-turned-dots, auto-advance), and now the same
+   real event photos too — each slide is a full page intro (that page's own
+   eyebrow/h1/p) layered over one of those photos with a scrim strong enough
+   to carry large display type, rather than a stock illustration standing in
+   for "this is a real, active org." */
 .hero-carousel{
   position:relative; overflow:hidden;
   height:min(620px, 88vh);
-  background:linear-gradient(135deg, var(--navy) 0%, #1B2E5C 48%, #2A2154 100%);
+  background:var(--navy); /* shows briefly under each slide's photo while it loads */
 }
 .hero-carousel .carousel-track{height:100%;}
-.hero-carousel .carousel-slide{display:flex; align-items:center; height:100%;}
-.hero-carousel-art{
-  position:absolute; right:-40px; top:50%; translate:0 -50%; z-index:1;
-  width:44%; max-width:520px; pointer-events:none;
+.hero-carousel .carousel-slide{position:relative; display:flex; align-items:center; height:100%;}
+.hero-carousel .carousel-slide img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;}
+.hero-carousel .carousel-slide::before{
+  content:""; position:absolute; inset:0; z-index:1;
+  background:
+    linear-gradient(100deg, rgba(9,15,32,.92) 0%, rgba(9,15,32,.72) 42%, rgba(9,15,32,.3) 72%, rgba(9,15,32,.12) 100%),
+    linear-gradient(0deg, rgba(9,15,32,.55) 0%, rgba(9,15,32,0) 35%);
 }
 /* Not .wrap — a flex item with margin:auto centers itself in the slide
    instead of hugging the left edge. This computes the same left inset .wrap
@@ -668,9 +669,6 @@ footer .wrap{padding:56px 28px 32px;}
 }
 .hero-carousel .carousel-tabs button::after{display:none;}
 .hero-carousel .carousel-tabs button.active{width:20px; background:#fff;}
-@media (max-width: 1024px){
-  .hero-carousel-art{display:none;}
-}
 @media (max-width: 640px){
   .hero-carousel{height:min(560px, 92vh);}
   .carousel-arrow{width:34px; height:34px;}

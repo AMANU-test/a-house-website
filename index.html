@@ -51,24 +51,17 @@
   <!-- Rotating showcase of the site's own sections — each slide reuses that
        page's real eyebrow/h1/p rather than inventing separate marketing copy,
        so this stays accurate as those pages change. Home leads since it's the
-       site's own identity statement; the rest follow header nav order. -->
+       site's own identity statement; the rest follow header nav order.
+       Backdrops are real A-HOUSE event photos (the ones that used to live in
+       a separate "Moments from our events" carousel further down — folded in
+       here instead of duplicating a second showcase section) rather than an
+       illustration; they don't need to thematically match each slide's page,
+       they're just the "this is a real, active org" backdrop while the text
+       carries the per-page info. -->
   <section class="hero-carousel" data-carousel>
-    <svg class="hero-carousel-art" viewBox="0 0 520 520" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <defs>
-        <radialGradient id="hcGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#F0A64C" stop-opacity=".32"/>
-          <stop offset="100%" stop-color="#F0A64C" stop-opacity="0"/>
-        </radialGradient>
-      </defs>
-      <circle cx="290" cy="260" r="220" fill="url(#hcGlow)"/>
-      <path d="M40 400 L180 140 L250 250 L300 170 L350 250 L480 400" fill="none" stroke="#7C96D9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity=".75"/>
-      <path d="M38 398 L178 138 L248 248 L298 168 L348 248 L478 398" fill="none" stroke="#F0A64C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
-      <path d="M180 140 L300 170 M250 250 L350 250" stroke="#7C96D9" stroke-width="1" opacity=".5"/>
-      <g fill="#F0A64C"><circle cx="180" cy="140" r="5"/><circle cx="300" cy="170" r="4"/></g>
-      <g fill="#fff"><circle cx="250" cy="250" r="4"/><circle cx="350" cy="250" r="4"/><circle cx="40" cy="400" r="3"/><circle cx="480" cy="400" r="3"/></g>
-    </svg>
     <div class="carousel-track">
       <div class="carousel-slide">
+        <img src="assets/events/general-assembly-1-b.jpg" alt="Full member turnout at General Assembly 1">
         <div class="hc-content">
           <span class="eyebrow">Atenean Hub of Upcoming Student Entrepreneurs</span>
           <h1>Where Ateneo students turn<br>ideas into <em>startups.</em></h1>
@@ -81,6 +74,7 @@
         </div>
       </div>
       <div class="carousel-slide">
+        <img src="assets/events/general-assembly-1-a.jpg" alt="Officers celebrating with star balloons at General Assembly 1">
         <div class="hc-content">
           <span class="eyebrow">About Us</span>
           <h1>Building Ateneo's<br><em>entrepreneurial ecosystem.</em></h1>
@@ -91,6 +85,7 @@
         </div>
       </div>
       <div class="carousel-slide">
+        <img src="assets/events/startup-spark.jpg" alt="Members posing after the Startup Spark #1 session">
         <div class="hc-content">
           <span class="eyebrow">Events</span>
           <h1>Workshops, talks,<br>and <em>pitch nights.</em></h1>
@@ -101,6 +96,7 @@
         </div>
       </div>
       <div class="carousel-slide">
+        <img src="assets/events/sip-and-scale.jpg" alt="Members holding Sip &amp; Scale cards at a cafe event">
         <div class="hc-content">
           <span class="eyebrow">Role Directory</span>
           <h1>Get to know the role<br>before you <em>apply.</em></h1>
@@ -111,6 +107,7 @@
         </div>
       </div>
       <div class="carousel-slide">
+        <img src="assets/events/pasta-and-possibilities-1.jpg" alt="Group photo outdoors at Pasta and Possibilities">
         <div class="hc-content">
           <span class="eyebrow">Contact</span>
           <h1>Let's talk.</h1>
@@ -124,47 +121,6 @@
     <button class="carousel-arrow prev" aria-label="Previous slide"></button>
     <button class="carousel-arrow next" aria-label="Next slide"></button>
     <div class="carousel-tabs"></div>
-  </section>
-
-  <div class="wrap"><div class="divider"></div></div>
-
-  <section class="section tight">
-    <div class="wrap">
-      <div class="section-head">
-        <span class="eyebrow">Life at A-HOUSE</span>
-        <h2 style="margin-top:8px;">Moments from our events</h2>
-        <p>A few snapshots from workshops, talks, and general assemblies this year.</p>
-      </div>
-      <div class="carousel has-caption" data-carousel>
-        <div class="carousel-track">
-          <div class="carousel-slide">
-            <img src="assets/events/sip-and-scale.jpg" alt="Members holding Sip &amp; Scale cards at a cafe event, A-HOUSE x Sip &amp; Scale, Mar 13">
-            <div class="carousel-caption"><span class="cap-date">Mar 13</span><span class="cap-title">A-HOUSE X Sip &amp; Scale</span></div>
-          </div>
-          <div class="carousel-slide">
-            <img src="assets/events/startup-spark.jpg" alt="Members posing after the Startup Spark #1 session, Feb 27">
-            <div class="carousel-caption"><span class="cap-date">Feb 27</span><span class="cap-title">Startup Spark #1</span></div>
-          </div>
-          <div class="carousel-slide">
-            <img src="assets/events/pasta-and-possibilities-1.jpg" alt="Group photo outdoors at Pasta and Possibilities, Apr 22">
-            <div class="carousel-caption"><span class="cap-date">Apr 22</span><span class="cap-title">Pasta and Possibilities</span></div>
-          </div>
-          <div class="carousel-slide">
-            <img src="assets/events/pasta-and-possibilities-2.jpg" alt="Members seated on the lawn listening to a speaker at Pasta and Possibilities, Apr 22">
-            <div class="carousel-caption"><span class="cap-date">Apr 22</span><span class="cap-title">Pasta and Possibilities</span></div>
-          </div>
-          <div class="carousel-slide">
-            <img src="assets/events/general-assembly-1-b.jpg" alt="Full member turnout at General Assembly 1, Mar 11">
-            <div class="carousel-caption"><span class="cap-date">Mar 11</span><span class="cap-title">General Assembly 1</span></div>
-          </div>
-          <div class="carousel-slide">
-            <img src="assets/events/general-assembly-1-a.jpg" alt="Officers celebrating with star balloons at General Assembly 1, Mar 11">
-            <div class="carousel-caption"><span class="cap-date">Mar 11</span><span class="cap-title">General Assembly 1</span></div>
-          </div>
-        </div>
-        <div class="carousel-tabs"></div>
-      </div>
-    </div>
   </section>
 
   <div class="wrap"><div class="divider"></div></div>
