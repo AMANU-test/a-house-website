@@ -2,9 +2,11 @@
 /* scrollToId lives in main.js (shared across pages) */
 
 /* The four JD-style sections (Management Board, Executive Board, Department
-   Teams, Members) — used both to auto-open the right one from an org chart
-   click (ensureTierVisible) and to close the other three whenever one opens
-   (toggleTier), so only one is ever showing at a time. */
+   Teams, Members) — clicking one of the four "Learn more" buttons below
+   closes whichever of the other three was open (toggleTier), so manually
+   browsing keeps only one open at a time. Clicking a node in the org chart
+   is a separate path (openDepartment, further down) that deliberately opens
+   three of these at once — see its own comment for why. */
 const ALL_TIERS = [
   {containerId:'mb-grid-wrap', btnId:'mb-toggle'},
   {containerId:'eb-departments-wrap', btnId:'eb-toggle'},
@@ -47,34 +49,61 @@ function toggleTier(containerId, btnId){
   btn.querySelector('.tier-toggle-label').textContent = isOpen ? 'Hide' : 'Learn more';
 }
 
-/* If a chart node's card lives inside a collapsed tier, open that tier first —
-   otherwise scrollIntoView below would try to scroll to a hidden element.
-   For Department Teams this also selects the specific department tab the
-   card lives in (see renderTL/selectTLTab) — the tier itself has to be
-   un-hidden AND that one department's tab selected, since a card can be
-   hidden by either. */
-function ensureTierVisible(el){
-  for(const t of ALL_TIERS){
-    const container = document.getElementById(t.containerId);
-    if(container && container.contains(el) && container.classList.contains('tier-hidden')){
-      toggleTier(t.containerId, t.btnId);
-    }
-  }
-  const panel = el.closest('.tl-panel-content');
-  if(panel) selectTLTab(panel.dataset.dept);
+/* Force a tier open regardless of the usual one-at-a-time exclusivity above —
+   used by openDepartment below, which deliberately opens three tiers at
+   once. A no-op if the tier's already open. */
+function forceOpenTier(containerId, btnId){
+  const container = document.getElementById(containerId);
+  const btn = document.getElementById(btnId);
+  if(!container.classList.contains('tier-hidden')) return;
+  container.classList.remove('tier-hidden');
+  btn.classList.add('open');
+  btn.setAttribute('aria-expanded', 'true');
+  btn.querySelector('.tier-toggle-label').textContent = 'Hide';
 }
 
-function openAndScroll(slug){
+function expandAndFlash(slug){
   const card = document.getElementById('card-' + slug);
-  if(!card) return;
-  ensureTierVisible(card);
+  if(!card) return null;
   if(!card.classList.contains('open')){
     const toggle = card.querySelector('.card-toggle');
     if(toggle) toggle.click();
   }
-  card.scrollIntoView({behavior:'smooth', block:'center'});
   card.classList.add('flash');
   setTimeout(() => card.classList.remove('flash'), 1400);
+  return card;
+}
+
+/* Clicking any node for a department in the org chart — Chief, Head, or a
+   Lead — opens that department's whole chain of command at once (Management
+   Board, Executive Board, and that one Department Teams tab), each showing
+   the department's card already expanded, rather than just the single role
+   that was clicked. That's worth breaking the tiers' usual "only one open at
+   a time" rule for: the point here is specifically to see a department
+   end-to-end in one pass, which is also why it scrolls to whichever node was
+   actually clicked instead of always jumping to the Chief. */
+function openDepartment(deptKey, focusSlug){
+  forceOpenTier('mb-grid-wrap', 'mb-toggle');
+  forceOpenTier('eb-departments-wrap', 'eb-toggle');
+  forceOpenTier('tl-departments-wrap', 'tl-toggle');
+  showTLTab(deptKey);
+
+  const chief = mbRoles.find(r => r.dept === deptKey);
+  const head = ebRoles.find(r => r.dept === deptKey && r.tier === 'head');
+  const leads = leadRoles.filter(r => r.dept === deptKey);
+  [chief.slug, head.slug, ...leads.map(l => l.slug)].forEach(expandAndFlash);
+
+  // Everything above waits on two CSS transitions (.tier-anim's grid-rows,
+  // .card-detail's max-height) that are still animating when this function
+  // returns — scrolling immediately targets the pre-animation position, which
+  // is wrong once cards above the focus card (a department's Chief, sitting
+  // in Management Board above Executive Board and Department Teams) finish
+  // growing and push it further down. Waiting the ~500ms out lets layout
+  // settle first.
+  setTimeout(() => {
+    const focusCard = document.getElementById('card-' + focusSlug);
+    if(focusCard) focusCard.scrollIntoView({behavior:'smooth', block:'center'});
+  }, 500);
 }
 
 /* ---------------- data: Management Board (Chiefs) ---------------- */
@@ -495,14 +524,14 @@ function renderOrgChart(){
     return `
       <div class="org-dept">
         <div class="org-dept-name">${dept.name}</div>
-        <button class="org-node chief" onclick="openAndScroll('${chief.slug}')">${chief.title}</button>
-        <button class="org-node head" onclick="openAndScroll('${head.slug}')">${head.title}</button>
+        <button class="org-node chief" onclick="openDepartment('${dept.key}','${chief.slug}')">${chief.title}</button>
+        <button class="org-node head" onclick="openDepartment('${dept.key}','${head.slug}')">${head.title}</button>
         ${leads.length ? `<div class="org-dept-leads">${leads.map(l => {
           // The chart node names the *team* ("Content & Design Team"), not the Lead role
           // ("Lead, Content & Design") — makes clear each box is a group a Lead runs,
           // not one person. supervises is always "<Team name> Team members".
           const teamName = l.supervises.replace(/ members$/, '');
-          return `<button class="org-node lead" onclick="openAndScroll('${l.slug}')">${teamName}</button>`;
+          return `<button class="org-node lead" onclick="openDepartment('${dept.key}','${l.slug}')">${teamName}</button>`;
         }).join('')}</div>` : ''}
       </div>
     `;
@@ -547,22 +576,28 @@ function renderTL(){
   `;
 }
 
-function selectTLTab(deptKey){
-  const wrap = document.getElementById('tl-panel-wrap');
-  const tabs = document.querySelectorAll('.tl-tab');
-  const alreadyActive = [...tabs].some(t => t.classList.contains('active') && t.dataset.dept === deptKey);
-
-  if(alreadyActive){
-    tabs.forEach(t => t.classList.remove('active'));
-    wrap.classList.add('tier-hidden');
-    return;
-  }
-
-  tabs.forEach(t => t.classList.toggle('active', t.dataset.dept === deptKey));
+/* Always shows deptKey's panel, opening it if the panel was closed — unlike
+   selectTLTab below, this never closes anything, so openDepartment can call
+   it without undoing its own forceOpenTier calls. */
+function showTLTab(deptKey){
+  document.querySelectorAll('.tl-tab').forEach(t => t.classList.toggle('active', t.dataset.dept === deptKey));
   document.querySelectorAll('.tl-panel-content').forEach(c => {
     c.hidden = c.dataset.dept !== deptKey;
   });
-  wrap.classList.remove('tier-hidden');
+  document.getElementById('tl-panel-wrap').classList.remove('tier-hidden');
+}
+
+/* Tab-click handler: same department clicked again closes the panel,
+   otherwise switches to it. */
+function selectTLTab(deptKey){
+  const alreadyActive = [...document.querySelectorAll('.tl-tab')]
+    .some(t => t.classList.contains('active') && t.dataset.dept === deptKey);
+  if(alreadyActive){
+    document.querySelectorAll('.tl-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tl-panel-wrap').classList.add('tier-hidden');
+    return;
+  }
+  showTLTab(deptKey);
 }
 
 renderMB();
