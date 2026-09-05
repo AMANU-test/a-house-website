@@ -1,7 +1,8 @@
 // Native horizontal scroll-snap carousel. Swipe/scroll/drag to browse, click a
-// numbered tab to jump to a slide, and it auto-advances when left alone —
-// pausing the moment someone touches or scrolls it manually, then resuming
-// a beat after they stop. Works off data-carousel root.
+// numbered tab (or a prev/next arrow, where the markup has them) to jump to
+// a slide, and it auto-advances when left alone — pausing the moment someone
+// touches or scrolls it manually, then resuming a beat after they stop.
+// Works off data-carousel root.
 (function () {
   document.querySelectorAll('[data-carousel]').forEach(function (root) {
     const track = root.querySelector('.carousel-track');
@@ -61,6 +62,16 @@
     function pause() {
       if (timer) clearInterval(timer);
     }
+
+    // Arrows are optional — only carousels with .carousel-arrow.prev/.next
+    // in their markup (currently just the home hero) get them.
+    const prevBtn = root.querySelector('.carousel-arrow.prev');
+    const nextBtn = root.querySelector('.carousel-arrow.next');
+    if (prevBtn) prevBtn.addEventListener('click', function () {
+      const i = rawIndex();
+      goTo(i === 0 ? count - 1 : i - 1);
+    });
+    if (nextBtn) nextBtn.addEventListener('click', next);
 
     let ticking = false;
     track.addEventListener('scroll', function () {
