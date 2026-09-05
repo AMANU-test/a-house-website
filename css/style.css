@@ -127,8 +127,8 @@ header.menu-open .mobile-links{display:flex;}
 .section-head p{color:var(--slate); margin-top:10px; max-width:560px; font-size:15px;}
 
 /* Lets Management Board and Executive Board collapse — those grids get long
-   once every role is listed out in full. Team Leads uses its own per-department
-   accordion instead (see .tl-dept-group below). */
+   once every role is listed out in full. Department Teams uses its own
+   tab-row-plus-panel pattern instead (see .tl-tabs below). */
 .tier-title-row{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
 .tier-toggle{
   display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12px;
@@ -143,8 +143,8 @@ header.menu-open .mobile-links{display:flex;}
    animating grid-template-rows between 0fr and 1fr reveals a child's true
    auto height, not a guessed max-height ceiling. A guessed ceiling is
    exactly what clipped nested accordion content earlier on this same page
-   (see .tl-dept-group above) — Department Teams alone can have every
-   department's accordion open plus several role cards expanded at once, so
+   (see .tl-panel below) — Department Teams alone can have several of a
+   selected department's role cards expanded at once, so
    there's no safe fixed number here either. This wraps the real container
    (#mb-grid, #eb-departments, #tl-departments, #tracks-stack all keep their
    own ids and classes unchanged) rather than replacing it, so none of the
@@ -392,7 +392,8 @@ footer .wrap{padding:56px 28px 32px;}
    feed back into) instead of a small corner label easy to miss. */
 .org-tracks-node{
   align-self:center; position:relative;
-  background:var(--navy); color:#fff; font-family:var(--display); font-weight:700;
+  background:#F1F4FA; color:var(--navy); border:1px solid var(--line);
+  font-family:var(--display); font-weight:700;
   font-size:13px; padding:10px 24px; border-radius:10px; text-align:center;
 }
 .org-tracks-node::after{
@@ -433,35 +434,38 @@ footer .wrap{padding:56px 28px 32px;}
 .org-legend i{width:9px; height:9px; border-radius:50%; display:inline-block;}
 .org-legend i.outline{background:#FAFBFD; border:1px dashed #C7CEDC;}
 
-/* ---------- team leads section: accordion ---------- */
-/* Each department is a native <details> — card-styled like the rest of the
-   site, closed by default, opened individually. Deliberately not a hand-rolled
-   max-height toggle: a role card's own "View full responsibilities" can grow
-   *inside* an already-open panel, and a max-height snapshot taken at open-time
-   has no way to know that happened, so the newly-taller content just gets
-   clipped. <details> has no height to get stale — instant open/close, but
-   correct for content of any size, and keyboard/screen-reader accessible for free. */
-.tl-dept-group{
-  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
-  margin-bottom:12px; transition:border-color .15s ease;
+/* ---------- department teams: tab row + shared panel ---------- */
+/* Six departments side by side as tabs, not stacked as six rows — one shared
+   panel below shows whichever department is selected, so it reads as one
+   thing expanding to cover the space under the row rather than six
+   independent accordions pushing the page around. The panel uses the same
+   .tier-anim grid-rows technique as the rest of this page's expand/collapse
+   (see .tier-anim above) — that animates to the content's true height, not a
+   guessed ceiling, so a role card's own "View full responsibilities"
+   growing *inside* an already-open panel can't get clipped. */
+.tl-tabs{display:grid; grid-template-columns:repeat(6, 1fr); gap:8px;}
+.tl-tab{
+  font-family:var(--display); font-weight:700; font-size:13px; line-height:1.25;
+  text-align:center; padding:14px 10px; cursor:pointer;
+  background:var(--card); color:var(--slate); border:1px solid var(--line);
+  border-radius:var(--radius); transition:.15s ease;
 }
-.tl-dept-group:last-child{margin-bottom:0;}
-.tl-dept-group[open]{border-color:var(--navy-light);}
-.tl-dept-toggle{
-  display:flex; align-items:center; justify-content:space-between; gap:16px;
-  padding:18px 22px; cursor:pointer; list-style:none; transition:background .15s ease;
-  border-radius:var(--radius);
+.tl-tab:hover{color:var(--navy); border-color:var(--navy-light);}
+.tl-tab.active{color:var(--navy); border-color:var(--navy-light); box-shadow:0 2px 0 var(--navy-light) inset;}
+.tl-panel{
+  margin-top:12px; background:var(--card); border:1px solid var(--navy-light);
+  border-radius:var(--radius); box-shadow:0 16px 32px -20px rgba(22,39,79,.35);
+  padding:22px;
 }
-.tl-dept-toggle::-webkit-details-marker{display:none;}
-.tl-dept-toggle::marker{display:none; content:"";}
-.tl-dept-toggle:hover{background:#F8F9FC;}
-.tl-dept-group[open] .tl-dept-toggle{border-radius:var(--radius) var(--radius) 0 0;}
-.tl-dept-toggle-text{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;}
-.tl-dept-toggle-text h3{font-family:var(--display); font-size:17px; color:var(--navy); margin:0;}
+.tl-panel-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:16px;}
+.tl-panel-head h3{font-family:var(--display); font-size:17px; color:var(--navy); margin:0;}
 .tl-dept-reports{font-family:var(--mono); font-size:11px; color:var(--slate-soft);}
-.tl-dept-toggle .chev{flex:0 0 auto;}
-.tl-dept-group[open] .chev{transform:rotate(-135deg);}
-.tl-dept-body-inner{padding:4px 22px 22px;}
+@media (max-width: 900px){
+  .tl-tabs{grid-template-columns:repeat(3, 1fr);}
+}
+@media (max-width: 560px){
+  .tl-tabs{grid-template-columns:repeat(2, 1fr);}
+}
 
 /* ---------- org chart: project teams branch ---------- */
 .org-project-branch{display:flex; flex-direction:column; align-items:center; margin-top:0;}

@@ -49,18 +49,10 @@ function toggleTier(containerId, btnId){
 
 /* If a chart node's card lives inside a collapsed tier, open that tier first —
    otherwise scrollIntoView below would try to scroll to a hidden element.
-   For Department Teams this also opens the specific department <details> the
-   card lives in (see renderTL) — the tier itself has to be un-hidden AND that
-   one department panel opened, since a card can be hidden by either.
-
-   Department Teams' panels are native <details> rather than a hand-rolled
-   max-height toggle: a role card's own "View full responsibilities" can grow
-   *inside* an already-open department panel, and a max-height snapshot taken
-   when the panel opened has no way to know that happened, so the newly-taller
-   content just gets clipped. <details> has no height to get stale — the
-   browser handles arbitrary content size for free. They all share
-   name="team-leads-accordion" too, so opening one natively closes whichever
-   other department panel was open — no JS needed for that. */
+   For Department Teams this also selects the specific department tab the
+   card lives in (see renderTL/selectTLTab) — the tier itself has to be
+   un-hidden AND that one department's tab selected, since a card can be
+   hidden by either. */
 function ensureTierVisible(el){
   for(const t of ALL_TIERS){
     const container = document.getElementById(t.containerId);
@@ -68,8 +60,8 @@ function ensureTierVisible(el){
       toggleTier(t.containerId, t.btnId);
     }
   }
-  const tlGroup = el.closest('.tl-dept-group');
-  if(tlGroup) tlGroup.open = true;
+  const panel = el.closest('.tl-panel-content');
+  if(panel) selectTLTab(panel.dataset.dept);
 }
 
 function openAndScroll(slug){
@@ -517,31 +509,60 @@ function renderOrgChart(){
   }).join('');
 }
 
+/* Department Teams: a row of 6 department tabs, not a 6-row vertical stack —
+   one shared panel below shows whichever department is selected, so opening
+   one department's Leads doesn't push five other closed rows down the page
+   before you even get there. Starts fully closed (no tab active, panel
+   height 0) like every other tier on this page; clicking a tab opens the
+   panel to that department, clicking the same tab again closes it, and
+   clicking a different tab just swaps the panel's content in place. */
 function renderTL(){
   const container = document.getElementById('tl-departments');
   const groups = departmentMeta
     .map(dept => ({dept, leads: leadRoles.filter(r => r.dept === dept.key)}))
     .filter(g => g.leads.length);
-  container.innerHTML = groups.map(g => {
+  const tabsHtml = groups.map(g => `
+    <button class="tl-tab" data-dept="${g.dept.key}" onclick="selectTLTab('${g.dept.key}')">${g.dept.name}</button>
+  `).join('');
+  const panelsHtml = groups.map(g => {
     const head = ebRoles.find(r => r.dept === g.dept.key && r.tier === 'head');
     const gridClass = g.leads.length >= 4 ? 'grid-4' : g.leads.length === 3 ? 'grid-3' : 'grid';
     return `
-      <details class="tl-dept-group" data-dept="${g.dept.key}" name="team-leads-accordion">
-        <summary class="tl-dept-toggle">
-          <span class="tl-dept-toggle-text">
-            <h3>${g.dept.name}</h3>
-            <span class="tl-dept-reports">Reports to: ${head.title}</span>
-          </span>
-          <span class="chev"></span>
-        </summary>
-        <div class="tl-dept-body-inner">
-          <div class="${gridClass}">
-            ${g.leads.map(role => cardTemplate(role, {codeClass:'lead', codeLabel:'TEAM LEAD'})).join('')}
-          </div>
+      <div class="tl-panel-content" data-dept="${g.dept.key}" hidden>
+        <div class="tl-panel-head">
+          <h3>${g.dept.name}</h3>
+          <span class="tl-dept-reports">Reports to: ${head.title}</span>
         </div>
-      </details>
+        <div class="${gridClass}">
+          ${g.leads.map(role => cardTemplate(role, {codeClass:'lead', codeLabel:'TEAM LEAD'})).join('')}
+        </div>
+      </div>
     `;
   }).join('');
+  container.innerHTML = `
+    <div class="tl-tabs">${tabsHtml}</div>
+    <div class="tier-anim tier-hidden" id="tl-panel-wrap">
+      <div class="tl-panel" id="tl-panel">${panelsHtml}</div>
+    </div>
+  `;
+}
+
+function selectTLTab(deptKey){
+  const wrap = document.getElementById('tl-panel-wrap');
+  const tabs = document.querySelectorAll('.tl-tab');
+  const alreadyActive = [...tabs].some(t => t.classList.contains('active') && t.dataset.dept === deptKey);
+
+  if(alreadyActive){
+    tabs.forEach(t => t.classList.remove('active'));
+    wrap.classList.add('tier-hidden');
+    return;
+  }
+
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.dept === deptKey));
+  document.querySelectorAll('.tl-panel-content').forEach(c => {
+    c.hidden = c.dataset.dept !== deptKey;
+  });
+  wrap.classList.remove('tier-hidden');
 }
 
 renderMB();
