@@ -162,6 +162,8 @@ header.menu-open .mobile-links{display:flex;}
 .feature-row{display:flex; align-items:center; gap:48px; flex-wrap:wrap;}
 .feature-text{flex:1 1 360px;}
 .feature-text p{color:var(--slate); margin-top:10px; font-size:15px; max-width:440px;}
+/* Question hook that opens each Events section, above the existing write-up paragraph. */
+.feature-text p.hook{font-family:var(--display); color:var(--navy); font-weight:700; font-size:19px; line-height:1.35; max-width:440px; margin-top:14px;}
 .feature-media{flex:1 1 360px; min-width:0;}
 @media (min-width:900px){
   .feature-row.reverse{flex-direction:row-reverse;}
@@ -171,6 +173,410 @@ header.menu-open .mobile-links{display:flex;}
 .grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:16px;}
 .grid-3{display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;}
 .grid-4{display:grid; grid-template-columns:repeat(4, 1fr); gap:16px;}
+/* Scoped to the home "Events & programs" grid, not the general .lead class,
+   so the lead-in verb (Learn/Meet/Support/See) reads as a highlighted keyword
+   without recoloring every other .lead paragraph on the site. Navy rather than
+   orange so it stays legible once the cards below sit on pastel note colors. */
+.kw-grid .lead strong{color:var(--navy); font-weight:700;}
+/* Hand-drawn red circle around the lead keyword, like a pen marking it up —
+   an SVG overlay rather than a border so it reads as a rough loop, not a shape. */
+.kw-grid .lead strong{
+  position:relative; display:inline-block; padding:0 3px;
+}
+.kw-grid .lead strong::after{
+  content:"";
+  position:absolute;
+  inset:-10px -14px -8px -14px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'%3E%3Cpath d='M100,10 C60,6 15,25 12,50 C9,78 55,94 103,92 C155,90 192,70 188,46 C184,24 145,8 100,10 C85,10 65,13 50,20' fill='none' stroke='%23D6272B' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+  pointer-events:none;
+}
+
+/* Corkboard + pinned sticky notes for the "Events & programs" cards — a
+   one-off treatment for this section, not a site-wide card style, so it's
+   scoped entirely under .kw-grid rather than touching .card itself. */
+.kw-grid{
+  background:
+    radial-gradient(circle at 12% 22%, rgba(255,255,255,.10) 0 1px, transparent 1px),
+    radial-gradient(circle at 68% 76%, rgba(0,0,0,.14) 0 1px, transparent 1px),
+    radial-gradient(circle at 42% 48%, rgba(0,0,0,.10) 0 1px, transparent 1px),
+    radial-gradient(circle at 82% 18%, rgba(0,0,0,.10) 0 1px, transparent 1px),
+    radial-gradient(circle at 25% 85%, rgba(255,255,255,.08) 0 1px, transparent 1px),
+    linear-gradient(135deg, #C99A64, #B07F45);
+  background-size: 16px 16px, 20px 20px, 24px 24px, 18px 18px, 22px 22px, 100% 100%;
+  padding: 34px 22px 42px;
+  border-radius: 18px;
+}
+.kw-grid .card{
+  --tilt: 0deg;
+  border:none;
+  border-radius:3px;
+  position:relative;
+  box-shadow: 3px 7px 14px rgba(0,0,0,.28);
+  transform: rotate(var(--tilt));
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.kw-grid .card:hover{
+  transform: rotate(0deg) translateY(-3px);
+  box-shadow: 5px 12px 20px rgba(0,0,0,.32);
+}
+.kw-grid .card::before{
+  /* pushpin head */
+  content:"";
+  position:absolute;
+  top:-9px; left:50%;
+  width:16px; height:16px;
+  margin-left:-8px;
+  border-radius:50%;
+  background: var(--pin, radial-gradient(circle at 32% 30%, #8fb4ff, #2451c9));
+  box-shadow: 0 3px 3px rgba(0,0,0,.4);
+}
+.kw-grid .card:nth-child(1){ --tilt: -2deg; background:#C3E6D1; }
+.kw-grid .card:nth-child(2){ --tilt: 1.5deg; background:#F6CE8F; --pin: radial-gradient(circle at 32% 30%, #fff, #d6d6d6); }
+.kw-grid .card:nth-child(3){ --tilt: -1.5deg; background:#EAEE8E; --pin: radial-gradient(circle at 32% 30%, #7fd88a, #1f8f3b); }
+.kw-grid .card:nth-child(4){ --tilt: 2deg; background:#D3EAA3; --pin: radial-gradient(circle at 32% 30%, #ff9c7f, #d6401c); }
+@media (max-width:760px){
+  .kw-grid .card{ transform:none; }
+  .kw-grid .card:hover{ transform: translateY(-3px); }
+}
+
+/* ---------- About page: Vision & Mission as clouds ---------- */
+/* The sky spans the whole scene — Vision & Mission AND the House section
+   below it, one continuous gradient behind both rather than confined to
+   just the cloud cards — fading to the page's own background only at the
+   very top (before Vision & Mission) and very bottom (after the House),
+   so the divider between the two sections doesn't cut the sky off. */
+.sky-scene{
+  background: linear-gradient(180deg,
+    var(--paper) 0%, #DCEEFB 10%, #DCEEFB 92%, var(--paper) 100%);
+}
+.sky-panel{ padding: 40px 4px 6px; }
+.cloud-grid{ gap:64px 32px; }
+.cloud-grid .card{
+  position:relative;
+  background:#fff;
+  border:none;
+  border-radius:40px;
+  box-shadow:0 12px 26px -14px rgba(22,39,79,.28);
+  animation: cloud-float 6s ease-in-out infinite;
+}
+/* Each pseudo-element is one "puff", plus a couple of extra puffs riding
+   along for free as box-shadow copies (a shadow inherits its element's
+   border-radius, so this reads as more overlapping circles rather than a
+   blur) — two humps alone read as a rounded rectangle with ears; a cluster
+   of five reads as an actual cumulus outline. */
+.cloud-grid .card::before, .cloud-grid .card::after{
+  content:"";
+  position:absolute;
+  background:#fff;
+  border-radius:50%;
+  z-index:-1;
+}
+.cloud-grid .card::before{
+  width:52px; height:52px; top:-22px; left:30px;
+  box-shadow:
+    38px 8px 0 -8px #fff,
+    -30px 12px 0 -12px #fff,
+    68px -6px 0 -6px #fff,
+    -8px -14px 0 -10px #fff,
+    -46px 2px 0 -16px #fff,
+    100px 14px 0 -18px #fff;
+}
+.cloud-grid .card::after{
+  width:74px; height:74px; top:-38px; right:34px;
+  box-shadow:
+    46px 18px 0 -16px #fff,
+    -46px 20px 0 -20px #fff,
+    -86px 26px 0 -28px #fff,
+    10px -18px 0 -22px #fff,
+    -22px -10px 0 -14px #fff,
+    -120px 34px 0 -34px #fff;
+}
+.cloud-grid .card:nth-child(2){ animation-delay:-3s; }
+@keyframes cloud-float{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-8px); }
+}
+@media (max-width:760px){
+  .cloud-grid{ gap:52px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .cloud-grid .card{ animation:none; }
+}
+
+/* ---------- About page: Core Competencies as a LEGO house (H-O-M-E) ----------
+   A stepped pyramid of individual brick rectangles for the roof (not a
+   smooth triangle), an off-white brick wall, four window "plates" each
+   capped in one of the H-O-M-E colors, and a green baseplate row underneath.
+   Bricks are told apart by seam lines (borders between them), not studs —
+   a single stud on a small letter tile read as a stray dot rather than a
+   real connector, so none of the pieces here get one. */
+.lego-house{
+  max-width:660px; margin:50px auto 0; position:relative;
+  --lego-outline:#1B1B1B;
+  --lego-red:#D6473C;
+  --lego-yellow:#E8B33B;
+  --lego-blue:#3E7FD1;
+  --lego-green:#4C9F6B;
+  --brick-h:clamp(18px, 3.6vw, 28px);
+  /* One consistent brick module, in % of the house's own width, sized so
+     5 of them equal the eave's 112% footprint. Every tier is a whole
+     number of this SAME unit (1,2,3,4,5 bricks) — that's what makes the
+     coursing come out staggered by exactly half a brick per side: tier N
+     is (N × unit) wide and centered, so it insets 0.5 unit from the tier
+     below it on each side, landing each tier's edge brick squarely on the
+     joint of the two bricks beneath it, the way real running-bond coursing
+     works. The previous version sized each tier's bricks independently
+     (flex:1 across arbitrary tier widths), so brick width drifted between
+     tiers and rows read as disconnected floating bars rather than one
+     structure. */
+  --brick-unit:22.4%;
+  /* Shared paper-grain (feTurbulence noise, alpha baked to ~6% in the
+     feColorMatrix) reused as a subtle plastic-texture layer on the roof and
+     wall bricks. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch' result='t'/%3E%3CfeColorMatrix in='t' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* Roof: five tiers of real brick elements, centered and narrowing toward
+   the top (1, 2, 3, 4, 5 bricks) built from one consistent brick module
+   (see --brick-unit above) so it reads as one continuous stepped-pyramid
+   structure — not a stack of separately-sized floating bars — and the
+   silhouette is unambiguously a pyramid, not just a couple of shallow
+   shoulders. */
+.lego-roof{ position:relative; display:flex; flex-direction:column; align-items:center; }
+/* The chimney is anchored from the roof's TOP (the peak) and reaches down
+   past it rather than being positioned off the roof's bottom edge — its
+   height is deliberately more than its distance above the peak, so its
+   lower half is embedded inside tiers t1–t3 (hidden behind their opaque
+   bricks, since they're later in the DOM and paint on top of it) while its
+   upper half pokes out above the roofline. That overlap is what makes it
+   read as built into the roof instead of hovering over it with a gap. */
+/* Tier spans (centered, N × --brick-unit wide): t1 38.8–61.2%, t2 27.6–
+   72.4%, t3 16.4–83.6%. At left:15% the chimney used to sit outside every
+   one of those ranges for the whole depth it was embedded (t1+t2's rows) —
+   there was no actual brick under it there, just the empty step space
+   beside the narrower tiers, so it read as floating unattached next to the
+   roof rather than piercing through it. left:19–27% sits inside t3's span
+   but outside t2's (the exposed "shoulder" where t3 is wider than t2), so
+   embedding down through that depth actually lands on t3's brick. */
+.lego-chimney{
+  position:absolute;
+  left:19%;
+  top:calc(var(--brick-h) * -1.3);
+  width:clamp(30px, 8%, 44px);
+  height:calc(var(--brick-h) * 3.8);
+  background:#9AA1AC;
+  border:3px solid var(--lego-outline);
+  border-bottom:none;
+}
+.brick-tier{ display:flex; position:relative; z-index:1; }
+.brick-tier.t1{ width:calc(var(--brick-unit) * 1); }
+.brick-tier.t2{ width:calc(var(--brick-unit) * 2); }
+.brick-tier.t3{ width:calc(var(--brick-unit) * 3); }
+.brick-tier.t4{ width:calc(var(--brick-unit) * 4); }
+/* Eaves overhang the wall a little rather than sitting flush with it —
+   real roofs read wider than the walls they sit on. */
+.brick-tier.t5{ width:calc(var(--brick-unit) * 5); }
+.brick-tier .brick{
+  position:relative;
+  flex:1;
+  height:var(--brick-h);
+  /* Sunlit tint lives on each brick's own background now (lighter near the
+     top, darker toward the eaves via --sun-a/-b per tier below) instead of
+     one overlay rectangle spanning the whole roof's bounding box. That
+     overlay covered the box a pyramid actually occupies, not the pyramid's
+     silhouette — so it showed as a plain translucent rectangle floating in
+     the empty step notches beside the narrower tiers (most visibly right
+     where the chimney sits), reading as a stray "leftover square". */
+  background-image:
+    var(--grain),
+    linear-gradient(rgba(255,255,255,var(--sun-a, .2)), rgba(0,0,0,var(--sun-b, .06)));
+  background-color:var(--lego-red);
+  background-size:60px 60px, 100% 100%;
+  border:3px solid var(--lego-outline);
+}
+.brick-tier .brick + .brick{ border-left:none; }
+.brick-tier.t1 .brick{ --sun-a:.45; --sun-b:0; }
+.brick-tier.t2 .brick{ --sun-a:.35; --sun-b:.02; }
+.brick-tier.t3 .brick{ --sun-a:.25; --sun-b:.06; }
+.brick-tier.t4 .brick{ --sun-a:.15; --sun-b:.10; }
+.brick-tier.t5 .brick{ --sun-a:.06; --sun-b:.16; }
+/* H-O-M-E as a string of hanging lights under the eave, instead of four
+   flat tiles that had nothing visibly holding them there. A thin wire runs
+   the width of the eave; each letter hangs from it on its own short cord
+   and gets a warm glow, like a bulb rather than a plaque. */
+.lego-blocks{
+  position:relative; z-index:2;
+  display:flex; justify-content:center; align-items:flex-start;
+  gap:clamp(16px, 3.4vw, 26px);
+  margin-top:-8px;
+  padding-top:18px;
+}
+/* Fascia bridging the roof's wider eaves (t3, 112%) down to the narrower
+   wall (100%) below — without it, the overhang left a gap of bare page
+   background showing on either side, between the roof's outer edge and
+   the wall's edge inset beneath it. */
+.lego-blocks::before{
+  content:"";
+  position:absolute;
+  left:50%; top:14px; bottom:-6px;
+  width:112%;
+  transform:translateX(-50%);
+  background:#FBF8F1;
+  border-top:3px solid var(--lego-outline);
+  z-index:-1;
+}
+.lights-wire{
+  position:absolute;
+  top:9px; left:9%; right:9%; height:2px;
+  background:#3A3A3A;
+  border-radius:1px;
+  z-index:0;
+}
+.lego-block{
+  position:relative;
+  z-index:1;
+  margin-top:15px;
+  width:clamp(26px, 5.4vw, 34px); height:clamp(26px, 5.4vw, 34px);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--display); font-weight:700; font-size:clamp(12px, 2.4vw, 15px); color:#fff;
+  border:3px solid var(--lego-outline);
+  border-radius:50%;
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.3),
+    inset 0 -3px 0 rgba(0,0,0,.18),
+    0 0 10px 2px var(--glow, rgba(255,255,255,.5));
+}
+.lego-block::before{
+  /* the short cord from the wire down to this bulb */
+  content:"";
+  position:absolute;
+  top:-15px; left:50%;
+  width:2px; height:15px;
+  background:#3A3A3A;
+  transform:translateX(-50%);
+}
+.lego-block:nth-child(2){ background:var(--lego-red); --glow:rgba(214,71,60,.55); }
+.lego-block:nth-child(3){ background:var(--lego-yellow); color:var(--navy); --glow:rgba(232,179,59,.6); }
+.lego-block:nth-child(4){ background:var(--lego-blue); --glow:rgba(62,127,209,.55); }
+.lego-block:nth-child(5){ background:var(--lego-green); --glow:rgba(76,159,107,.55); }
+.lego-wall{
+  position:relative;
+  /* Off-white brick wall — a grid of seam lines rather than studs, so the
+     roof, blocks, and the four window caps below stay the ones doing the
+     color work. */
+  background-image:
+    var(--grain),
+    repeating-linear-gradient(90deg, rgba(0,0,0,.16) 0 2px, transparent 2px 44px),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.12) 0 2px, transparent 2px 32px),
+    linear-gradient(180deg, #FBF8F1, #F0ECE1);
+  background-size: 120px 120px, 100% 100%, 100% 100%, 100% 100%;
+  background-repeat: repeat, repeat, repeat, no-repeat;
+  border:5px solid var(--lego-outline);
+  border-top:none;
+  border-radius:0 0 14px 14px;
+  /* No bottom padding: the door and planters (.lego-yard) need to sit flush
+     against the wall's own bottom edge, which butts straight into the
+     green baseplate below — any padding here left them "floating" a strip
+     of bare wall above the ground instead of standing on it. */
+  padding:26px 24px 0;
+}
+/* Contact shadow at the roof/wall seam, like the roof casts a sliver of
+   shade onto the bricks just below it. */
+.lego-wall::before{
+  content:"";
+  position:absolute;
+  top:0; left:0; right:0; height:16px;
+  background:linear-gradient(180deg, rgba(0,0,0,.28), transparent);
+  pointer-events:none;
+}
+.lego-windows{ gap:18px; }
+.lego-windows .card{
+  position:relative;
+  background:#FFFDF8;
+  border:4px solid var(--lego-outline);
+  border-radius:12px;
+  padding-top:28px;
+  /* Layered material shadow: inset top-edge highlight (light from above), a
+     tight close shadow for contact, and a softer wider ambient shadow
+     further out — instead of one flat drop-shadow. */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.8),
+    0 2px 4px rgba(0,0,0,.22),
+    0 10px 18px -6px rgba(0,0,0,.2);
+}
+.lego-windows .card::before{
+  /* colored cap bar, matching the H-O-M-E block colors 1:1 by index */
+  content:"";
+  position:absolute; top:0; left:0; right:0; height:14px;
+  background:var(--cap, var(--lego-red));
+  border-radius:8px 8px 0 0;
+  border-bottom:3px solid var(--lego-outline);
+}
+.lego-windows .card:nth-child(1){ --cap:var(--lego-red); }
+.lego-windows .card:nth-child(2){ --cap:var(--lego-yellow); }
+.lego-windows .card:nth-child(3){ --cap:var(--lego-blue); }
+.lego-windows .card:nth-child(4){ --cap:var(--lego-green); }
+
+/* A door and two planters at the base of the wall — the touches that make
+   this read as a home, not just a wall of plaques. */
+.lego-yard{
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:22px;
+  margin-top:22px;
+}
+.lego-door{
+  position:relative;
+  width:60px; height:88px;
+  background:var(--navy);
+  border:4px solid var(--lego-outline);
+  border-bottom:none;
+  border-radius:24px 24px 3px 3px;
+  box-shadow:inset 3px 0 0 rgba(255,255,255,.12), inset -3px 0 0 rgba(0,0,0,.18);
+}
+.door-knob{
+  position:absolute; top:50%; right:9px; transform:translateY(-50%);
+  width:7px; height:7px;
+  border-radius:50%;
+  background:var(--lego-yellow);
+  border:1.5px solid var(--lego-outline);
+}
+.lego-plant{ display:flex; flex-direction:column; align-items:center; }
+.plant-leaves{
+  position:relative;
+  width:32px; height:28px;
+  background:var(--lego-green);
+  border:3px solid var(--lego-outline);
+  border-radius:50%;
+}
+.plant-leaves::after{
+  content:"";
+  position:absolute;
+  bottom:-5px; left:-9px;
+  width:20px; height:18px;
+  background:var(--lego-green);
+  border:3px solid var(--lego-outline);
+  border-radius:50%;
+}
+.plant-pot{
+  width:30px; height:22px;
+  margin-top:-2px;
+  background:#C1652F;
+  border:3px solid var(--lego-outline);
+  border-radius:0 0 6px 6px;
+}
+.lego-base{ display:flex; overflow:hidden; border-radius:0 0 8px 8px; }
+.lego-base .brick{
+  flex:1;
+  height:22px;
+  background:linear-gradient(180deg, #5CB85C, #3E9B3E);
+  border:3px solid var(--lego-outline);
+}
+.lego-base .brick + .brick{ border-left:none; }
+@media (max-width:760px){
+  .lego-windows{ grid-template-columns:1fr; }
+}
+
 /* Stacked rather than side by side, and narrower than the full section width —
    two short cards side by side read as a comparison; stacked with Managerial
    first reads as "here's the fuller option, then the lighter one." Left-aligned
