@@ -49,10 +49,11 @@ function toggleTier(containerId, btnId){
 
 /* If a chart node's card lives inside a collapsed tier, open that tier first —
    otherwise scrollIntoView below would try to scroll to a hidden element.
-   For Department Teams this also selects the specific department tab the
-   card lives in (see renderTL/selectTLTab) — the tier itself has to be
-   un-hidden AND that one department's tab selected, since a card can be
-   hidden by either. */
+   For all three department-selector tiers (Management Board, Executive
+   Board, Department Teams) this also selects the specific department tile
+   the card lives in (see renderDeptSelector/selectDeptTab) — the tier itself
+   has to be un-hidden AND that one department's tile selected, since a card
+   can be hidden by either. */
 function ensureTierVisible(el){
   for(const t of ALL_TIERS){
     const container = document.getElementById(t.containerId);
@@ -60,21 +61,37 @@ function ensureTierVisible(el){
       toggleTier(t.containerId, t.btnId);
     }
   }
-  const panel = el.closest('.tl-panel-content');
-  if(panel) selectTLTab(panel.dataset.dept);
+  const panel = el.closest('.dept-panel-content');
+  if(panel) selectDeptTab(panel.dataset.tier, panel.dataset.id);
 }
 
 function openAndScroll(slug){
-  const card = document.getElementById('card-' + slug);
-  if(!card) return;
-  ensureTierVisible(card);
-  if(!card.classList.contains('open')){
-    const toggle = card.querySelector('.card-toggle');
-    if(toggle) toggle.click();
-  }
-  card.scrollIntoView({behavior:'smooth', block:'center'});
-  card.classList.add('flash');
-  setTimeout(() => card.classList.remove('flash'), 1400);
+  const el = document.getElementById('role-' + slug);
+  if(!el) return;
+  ensureTierVisible(el);
+
+  // Not el.scrollIntoView() — el sits inside a horizontally snap-scrolling
+  // .dept-screen-track, and the outer tier is still mid-transition (the
+  // grid-rows 0fr->1fr animation from ensureTierVisible's toggleTier just
+  // started) when this runs. scrollIntoView's automatic inline adjustment
+  // reads that not-yet-settled layout and can nudge the track off page 0,
+  // which the scroll-snap then "corrects" onto the wrong page once layout
+  // catches up. A plain vertical window scroll never touches the track, so
+  // it can't trigger that at all.
+  const scrollToRole = () => {
+    const rect = el.getBoundingClientRect();
+    const targetY = window.scrollY + rect.top - (window.innerHeight / 2 - rect.height / 2);
+    window.scrollTo({top: Math.max(targetY, 0), behavior: 'smooth'});
+  };
+  scrollToRole();
+  // Re-assert once the tier's own open transition (see .tier-anim, .45s) has
+  // finished, since that's what was still moving under us above — by then
+  // el's real position is stable, so this corrects any drift from the first
+  // scroll without re-triggering it (a second identical scrollTo is a no-op).
+  setTimeout(scrollToRole, 480);
+
+  el.classList.add('flash');
+  setTimeout(() => el.classList.remove('flash'), 1400);
 }
 
 /* ---------------- data: Management Board (Chiefs) ---------------- */
@@ -156,6 +173,32 @@ const departmentMeta = [
   {key:"finance",     name:"Finance Department",                chiefTitle:"Chief Financial Officer (CFO)"},
   {key:"innovations", name:"Innovations Department",            chiefTitle:"Chief Innovation Officer (CIO)"}
 ];
+
+/* One color + two-letter tag per department, reused across all three "choose
+   your department" selectors below (Management Board, Executive Board,
+   Department Teams) — the same "character" identity follows a department
+   from tier to tier instead of each row inventing its own scheme. */
+const deptStyle = {
+  growth:      {color:"#D6473C", tag:"GS"},
+  engagement:  {color:"#3E8FE0", tag:"ER"},
+  talent:      {color:"#E8B33B", tag:"TD"},
+  operations:  {color:"#4FAE7A", tag:"OP"},
+  finance:     {color:"#9B6BD9", tag:"FN"},
+  innovations: {color:"#DB7A2C", tag:"IN"}
+};
+
+/* Real headshots (chroma-keyed from actual green-screen photos, see
+   assets/roster/ — not generated or drawn) used only for the Management
+   Board roster tiles below — these are the six department Chiefs, not the
+   Heads. Every other tier keeps the plain letter-tag avatar. */
+const deptPhoto = {
+  growth:      "assets/roster/chief-growth.png",
+  engagement:  "assets/roster/chief-engagement.png",
+  talent:      "assets/roster/chief-talent.png",
+  operations:  "assets/roster/chief-operations.png",
+  finance:     "assets/roster/chief-finance.png",
+  innovations: "assets/roster/chief-innovations.png"
+};
 
 const ebRoles = [
   {slug:"head-growth", dept:"growth", tier:"head", title:"Head of Growth", date:"Jul 2026",
@@ -377,51 +420,36 @@ function renderResponsibilities(list){
   return list.map(block => `<li><strong>${block.label}:</strong> ${block.desc}</li>`).join('');
 }
 
-function cardTemplate(role, opts){
-  const codeClass = opts.codeClass;
-  const codeLabel = opts.codeLabel;
-  const dateLabel = opts.dateLabel || '';
-  const deptLabel = opts.deptLabel || '';
-  return `
-    <div class="card ${codeClass}" id="card-${role.slug}">
-      <div class="card-top">
-        <span class="card-code ${codeClass}">${codeLabel}</span>
-        ${dateLabel ? `<span class="card-date">${dateLabel}</span>` : ''}
-      </div>
-      ${deptLabel ? `<div class="card-dept">${deptLabel}</div>` : ''}
-      <h3>${role.title}</h3>
-      <p class="lead">${role.lead}</p>
-      <div class="card-toggle" onclick="toggleCard('${role.slug}')">
-        <span class="chev"></span> <span class="toggle-label">View full responsibilities</span>
-      </div>
-      <div class="card-detail" id="detail-${role.slug}">
-        <div class="card-detail-inner">
-          <div class="detail-block">
-            <h4>Key Responsibilities</h4>
-            <ul>${renderResponsibilities(role.responsibilities)}</ul>
-          </div>
-          <div class="detail-block">
-            <h4>Skills &amp; Competencies</h4>
-            <div class="skills-tags">${role.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}</div>
-          </div>
-        </div>
-      </div>
+/* Builds the three swipeable "screen" pages (Overview, Key Responsibilities,
+   Skills & Competencies) for one department's stage — see renderDeptSelector
+   below. `roles` is normally a single-role array (one Chief, one Head), but
+   Department Teams can have several Leads per department, so every page
+   handles an array: with one role each page is just that role's content;
+   with several, each role gets its own labeled block stacked in the page
+   instead of a separate screen per person — swiping stays "one category at a
+   time", not "one person at a time". */
+function buildDeptScreenPages(roles, opts){
+  const multi = roles.length > 1;
+  const overview = roles.map(r => `
+    <div class="dept-role-block" id="role-${r.slug}">
+      <span class="card-code ${opts.codeClass}">${opts.codeLabelFor(r)}</span>
+      <h4>${r.title}</h4>
+      <p>${r.lead}</p>
     </div>
-  `;
-}
-
-function toggleCard(slug){
-  const card = document.getElementById('card-' + slug);
-  const detail = document.getElementById('detail-' + slug);
-  const label = card.querySelector('.toggle-label');
-  const isOpen = card.classList.toggle('open');
-  if(isOpen){
-    detail.style.maxHeight = detail.scrollHeight + 40 + 'px';
-    label.textContent = 'Hide responsibilities';
-  } else {
-    detail.style.maxHeight = 0;
-    label.textContent = 'View full responsibilities';
-  }
+  `).join('');
+  const responsibilities = roles.map(r => `
+    <div class="dept-role-block">
+      ${multi ? `<h4>${r.title}</h4>` : ''}
+      <ul>${renderResponsibilities(r.responsibilities)}</ul>
+    </div>
+  `).join('');
+  const skills = roles.map(r => `
+    <div class="dept-role-block">
+      ${multi ? `<h4>${r.title}</h4>` : ''}
+      <div class="skills-tags">${r.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}</div>
+    </div>
+  `).join('');
+  return [overview, responsibilities, skills];
 }
 
 /* Management Board and Executive Board render as a 2-column grid, which
@@ -430,29 +458,89 @@ function toggleCard(slug){
    and the three "back-end" ones (Operations, Finance, Innovations) on the
    right, instead of departmentMeta's default order. Doesn't touch the org
    chart or Team Leads, which keep departmentMeta's own order. */
-const boardDisplayOrder = ['growth','operations','engagement','finance','talent','innovations'];
+const boardDisplayOrder = ['growth','engagement','talent','operations','finance','innovations'];
 function boardOrderedDepts(){
   return boardDisplayOrder.map(key => departmentMeta.find(d => d.key === key));
 }
 
-function renderMB(){
-  document.getElementById('mb-grid').innerHTML = boardOrderedDepts().map(dept => {
-    const r = mbRoles.find(role => role.dept === dept.key);
-    return cardTemplate(r, {codeClass:'chief', codeLabel:r.code});
-  }).join('');
+/* Management Board and Executive Board both get the "CRT terminal" console
+   shell wrapped around the exact same renderDeptSelector/selectDeptTab
+   machinery everything else on this page uses — only the chrome around it
+   (bezel, screen glass, scanlines, watermark) and its CSS skin differ; no
+   tab-selection logic is duplicated, so both stay exactly as reliable as
+   Department Teams. Real headshots (deptPhoto — the six Chiefs) replace the
+   plain letter tag on each tile, and a large duotone cutout of whichever
+   department is currently selected "enters" from the right edge of the
+   console, character-select-screen style (see crtEnterCharacter).
+
+   Executive Board reuses those same Chief cutouts — Heads don't have their
+   own photoshoot — but passes `locked: true`, which blacks every photo out
+   via CSS (.crt-console--locked, in style.css) for an "not unlocked yet"
+   silhouette instead of showing the Chief's actual face. */
+function renderCrtBoard(tier, gridId, {consoleLabel, rosterLabel, locked, groups}){
+  document.getElementById(gridId).innerHTML = `
+    <div class="crt-console${locked ? ' crt-console--locked' : ''}">
+      <div class="crt-console-topbar">
+        <span class="crt-led"></span>
+        <span class="crt-console-label">${consoleLabel}</span>
+        <div class="crt-vents"><span></span><span></span><span></span><span></span><span></span></div>
+      </div>
+      <div class="crt-screen">
+        <div class="crt-watermark" aria-hidden="true">${'A-HOUSE&nbsp; '.repeat(14)}</div>
+        <div class="crt-scanlines" aria-hidden="true"></div>
+        <img class="crt-enter-photo" id="${tier}-enter-photo" src="" alt="" aria-hidden="true">
+        <div class="crt-content" id="${tier}-departments-inner"></div>
+      </div>
+    </div>
+  `;
+
+  renderDeptSelector(tier, `${tier}-departments-inner`, groups);
+
+  const label = document.createElement('div');
+  label.className = 'crt-roster-label';
+  label.textContent = rosterLabel;
+  document.getElementById(`${tier}-departments-inner`).querySelector('.dept-select').before(label);
 }
 
+function renderMB(){
+  const groups = boardOrderedDepts().map(dept => {
+    const r = mbRoles.find(role => role.dept === dept.key);
+    const stageHeadHtml = `
+      <div class="dept-stage-head">
+        <h3>${dept.name}</h3>
+        <span class="dept-reports">Reports to: Chief Executive Officer</span>
+      </div>
+    `;
+    const pages = buildDeptScreenPages([r], {codeClass:'chief', codeLabelFor: role => role.code});
+    return {dept, tileSubtitle: r.code.replace('MB · ', ''), stageHeadHtml, pages, photoUrl: deptPhoto[dept.key]};
+  });
+  renderCrtBoard('mb', 'mb-grid', {
+    consoleLabel: 'A-HOUSE // ROLE-TERMINAL',
+    rosterLabel: 'Select department — Management Board roster',
+    groups
+  });
+}
+
+/* Executive Board — same console as Management Board, but locked: true so
+   every photo renders as a black silhouette (see renderCrtBoard above). */
 function renderEB(){
-  const container = document.getElementById('eb-departments');
-  const cardsHtml = boardOrderedDepts().map(dept => {
+  const groups = boardOrderedDepts().map(dept => {
     const role = ebRoles.find(r => r.dept === dept.key);
-    if(!role) return '';
-    return cardTemplate(role, {
-      codeClass: role.tier, codeLabel: 'EB · HEAD',
-      deptLabel: dept.name
-    });
-  }).join('');
-  container.innerHTML = `<div class="grid">${cardsHtml}</div>`;
+    const stageHeadHtml = `
+      <div class="dept-stage-head">
+        <h3>${dept.name}</h3>
+        <span class="dept-reports">Reports to: ${dept.chiefTitle}</span>
+      </div>
+    `;
+    const pages = buildDeptScreenPages([role], {codeClass:'head', codeLabelFor: () => 'EB · HEAD'});
+    return {dept, tileSubtitle: 'HEAD', stageHeadHtml, pages, photoUrl: deptPhoto[dept.key]};
+  });
+  renderCrtBoard('eb', 'eb-departments', {
+    consoleLabel: 'A-HOUSE // HEAD-TERMINAL',
+    rosterLabel: 'Select department — Executive Board roster',
+    locked: true,
+    groups
+  });
 }
 
 function renderOrgChart(){
@@ -478,60 +566,197 @@ function renderOrgChart(){
   }).join('');
 }
 
-/* Department Teams: a row of 6 department tabs, not a 6-row vertical stack —
-   one shared panel below shows whichever department is selected, so opening
-   one department's Leads doesn't push five other closed rows down the page
-   before you even get there. Starts fully closed (no tab active, panel
-   height 0) like every other tier on this page; clicking a tab opens the
-   panel to that department, clicking the same tab again closes it, and
-   clicking a different tab just swaps the panel's content in place. */
-function renderTL(){
-  const container = document.getElementById('tl-departments');
-  const groups = departmentMeta
-    .map(dept => ({dept, leads: leadRoles.filter(r => r.dept === dept.key)}))
-    .filter(g => g.leads.length);
-  const tabsHtml = groups.map(g => `
-    <button class="tl-tab" data-dept="${g.dept.key}" onclick="selectTLTab('${g.dept.key}')">${g.dept.name}</button>
-  `).join('');
-  const panelsHtml = groups.map(g => {
-    const head = ebRoles.find(r => r.dept === g.dept.key && r.tier === 'head');
-    const gridClass = g.leads.length >= 4 ? 'grid-4' : g.leads.length === 3 ? 'grid-3' : 'grid';
+/* ---------------- shared "choose your department" selector ---------------- */
+/* Used by all three org tiers (Management Board, Executive Board, Department
+   Teams) so picking a department works the same way everywhere: one shared
+   "screen" on top — a horizontally swipeable set of three pages (Overview,
+   Key Responsibilities, Skills & Competencies) — with a row of colored
+   department tiles below it, like a character-select screen where the
+   6 buttons choose what plays on the one screen above them. Each tier's
+   selection (and each screen's scroll position) is independent: picking
+   Growth Strategy under Executive Board doesn't touch Management Board's.
+
+   `groups` is [{dept, tileSubtitle, stageHeadHtml, pages}] — stageHeadHtml is
+   the department name + "Reports to" line, and pages is the [overview,
+   responsibilities, skills] html triple from buildDeptScreenPages, both
+   built by the caller. Starts fully closed (no tile active, screen height 0)
+   like every other tier on this page; clicking a tile opens the screen to
+   that department (always starting on the Overview page), clicking the same
+   tile again closes it, and clicking a different tile swaps the screen's
+   content in place. */
+const SCREEN_PAGE_LABELS = ['Overview', 'Key Responsibilities', 'Skills & Competencies'];
+
+function renderDeptSelector(tier, containerId, groups){
+  const container = document.getElementById(containerId);
+  const tilesHtml = groups.map(g => {
+    // `id` is what makes a tile/panel unique — usually just the department
+    // key (one tile per department, as on Management/Executive Board), but
+    // Department Teams puts several teams under one department, so it passes
+    // each team's own slug as `id` instead. `dept` stays the *department*
+    // throughout (color, photo, tag) regardless of how many tiles share it.
+    const id = g.id || g.dept.key;
+    const style = deptStyle[g.dept.key];
+    const avatarHtml = g.photoUrl
+      ? `<span class="dept-avatar dept-avatar-photo"><img src="${g.photoUrl}" alt="${g.dept.name} head"><span class="dept-avatar-tag">${style.tag}</span></span>`
+      : `<span class="dept-avatar">${style.tag}</span>`;
     return `
-      <div class="tl-panel-content" data-dept="${g.dept.key}" hidden>
-        <div class="tl-panel-head">
-          <h3>${g.dept.name}</h3>
-          <span class="tl-dept-reports">Reports to: ${head.title}</span>
-        </div>
-        <div class="${gridClass}">
-          ${g.leads.map(role => cardTemplate(role, {codeClass:'lead', codeLabel:'TEAM LEAD'})).join('')}
-        </div>
-      </div>
+      <button class="dept-tile" data-tier="${tier}" data-id="${id}" data-dept="${g.dept.key}" style="--dept-color:${style.color};" onclick="selectDeptTab('${tier}','${id}')">
+        ${avatarHtml}
+        <span>
+          <span class="dept-tile-name">${g.tileName || g.dept.name}</span>
+          <span class="dept-tile-tag">${g.tileSubtitle}</span>
+        </span>
+      </button>
     `;
   }).join('');
-  container.innerHTML = `
-    <div class="tl-tabs">${tabsHtml}</div>
-    <div class="tier-anim tier-hidden" id="tl-panel-wrap">
-      <div class="tl-panel" id="tl-panel">${panelsHtml}</div>
+  const panelsHtml = groups.map(g => {
+    const id = g.id || g.dept.key;
+    return `
+    <div class="dept-panel-content" data-tier="${tier}" data-id="${id}" data-dept="${g.dept.key}" data-photo="${g.photoUrl || ''}" hidden>
+      ${g.stageHeadHtml}
+      <div class="dept-screen">
+        <div class="dept-screen-track">
+          ${g.pages.map(p => `<div class="dept-screen-page">${p}</div>`).join('')}
+        </div>
+        <div class="dept-screen-nav">
+          ${SCREEN_PAGE_LABELS.map((label, i) => `<button class="dept-screen-dot${i === 0 ? ' active' : ''}" data-page="${i}">${label}</button>`).join('')}
+        </div>
+      </div>
     </div>
   `;
+  }).join('');
+  container.innerHTML = `
+    <div class="tier-anim tier-hidden" id="${tier}-stage-wrap">
+      <div class="dept-stage" id="${tier}-stage">${panelsHtml}</div>
+    </div>
+    <div class="dept-select">${tilesHtml}</div>
+  `;
+
+  container.querySelectorAll('.dept-panel-content').forEach(panel => {
+    const track = panel.querySelector('.dept-screen-track');
+    const dots = panel.querySelectorAll('.dept-screen-dot');
+    dots.forEach(dot => dot.addEventListener('click', () => {
+      track.scrollTo({left: track.clientWidth * Number(dot.dataset.page), behavior: 'smooth'});
+    }));
+    let ticking = false;
+    track.addEventListener('scroll', () => {
+      if(ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const idx = Math.round(track.scrollLeft / track.clientWidth);
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        ticking = false;
+      });
+    });
+  });
+
+  lockScreenHeight(container);
 }
 
-function selectTLTab(deptKey){
-  const wrap = document.getElementById('tl-panel-wrap');
-  const tabs = document.querySelectorAll('.tl-tab');
-  const alreadyActive = [...tabs].some(t => t.classList.contains('active') && t.dataset.dept === deptKey);
+/* The screen's height would otherwise follow whichever department/page is
+   showing — a short "Overview" then a long "Key Responsibilities" list makes
+   the whole console visibly grow and shrink as you click around. Instead,
+   measure every department's tallest page up front (each swapped into flow
+   just long enough to read its height, synchronously, so nothing is ever
+   actually painted mid-swap) and lock the screen to that one height via a
+   CSS variable — same trick as a carousel with mixed-length slides. */
+function lockScreenHeight(container){
+  const stage = container.querySelector('.dept-stage');
+  const panels = container.querySelectorAll('.dept-panel-content');
+  let maxH = 0;
+  panels.forEach(panel => {
+    const wasHidden = panel.hidden;
+    panel.hidden = false;
+    const h = panel.querySelector('.dept-screen').offsetHeight;
+    if(h > maxH) maxH = h;
+    panel.hidden = wasHidden;
+  });
+  if(maxH > 0) stage.style.setProperty('--screen-min-h', maxH + 'px');
+}
+
+function selectDeptTab(tier, id){
+  const wrap = document.getElementById(tier + '-stage-wrap');
+  const stage = document.getElementById(tier + '-stage');
+  const tiles = document.querySelectorAll(`.dept-tile[data-tier="${tier}"]`);
+  const alreadyActive = [...tiles].some(t => t.classList.contains('active') && t.dataset.id === id);
 
   if(alreadyActive){
-    tabs.forEach(t => t.classList.remove('active'));
+    tiles.forEach(t => t.classList.remove('active'));
     wrap.classList.add('tier-hidden');
+    crtExitCharacter(tier);
     return;
   }
 
-  tabs.forEach(t => t.classList.toggle('active', t.dataset.dept === deptKey));
-  document.querySelectorAll('.tl-panel-content').forEach(c => {
-    c.hidden = c.dataset.dept !== deptKey;
+  tiles.forEach(t => t.classList.toggle('active', t.dataset.id === id));
+  document.querySelectorAll(`.dept-panel-content[data-tier="${tier}"]`).forEach(c => {
+    c.hidden = c.dataset.id !== id;
   });
+  // The tile carries its own department key separately from `id` (see
+  // renderDeptSelector) — that's what colors the console and picks which
+  // photo enters, even when several tiles (Department Teams) share one.
+  const deptKey = [...tiles].find(t => t.dataset.id === id).dataset.dept;
+  stage.style.setProperty('--dept-color', deptStyle[deptKey].color);
   wrap.classList.remove('tier-hidden');
+  crtEnterCharacter(tier, deptKey);
+
+  // Always reopen on the Overview page, not wherever it was last scrolled to.
+  const activePanel = stage.querySelector(`.dept-panel-content[data-id="${id}"]`);
+  const track = activePanel.querySelector('.dept-screen-track');
+  track.scrollTo({left: 0, behavior: 'instant'});
+  activePanel.querySelectorAll('.dept-screen-dot').forEach((d, i) => d.classList.toggle('active', i === 0));
+}
+
+/* The large duotone cutout that "enters" from the right edge of the CRT
+   console when a department is selected (character-select-screen flourish,
+   see the Street Fighter reference) — a no-op wherever a tier doesn't render
+   a `${tier}-enter-photo` element (there isn't one outside a CRT console). */
+function crtEnterCharacter(tier, deptKey){
+  const img = document.getElementById(tier + '-enter-photo');
+  const photo = deptPhoto[deptKey];
+  if(!img || !photo) return;
+  img.src = photo;
+  img.alt = deptStyle[deptKey].tag + ' entering';
+  img.classList.remove('entering');
+  void img.offsetWidth; // restart the entrance animation even if it's already showing someone else
+  img.classList.add('active', 'entering');
+}
+
+function crtExitCharacter(tier){
+  const img = document.getElementById(tier + '-enter-photo');
+  if(img) img.classList.remove('active', 'entering');
+}
+
+/* Department Teams gets the same CRT console as Executive Board (locked
+   silhouettes — Leads don't have their own photoshoot either) but one tile
+   per *team*, not per department: 14 Leads across 6 departments, so a
+   department with 3 teams (e.g. Talent) shows 3 separate boxes instead of
+   stacking all 3 leads onto one shared panel. That's what `id` on each group
+   is for (see renderDeptSelector/selectDeptTab) — several tiles can now
+   share the same `dept` (for color/photo/code) while staying independently
+   selectable via each Lead's own slug. The wider roster tray this needs is
+   handled entirely in CSS (#tl-departments-inner .dept-select). */
+function renderTL(){
+  const groups = leadRoles.map(lead => {
+    const dept = departmentMeta.find(d => d.key === lead.dept);
+    const teamName = lead.supervises.replace(/ members$/, '');
+    const stageHeadHtml = `
+      <div class="dept-stage-head">
+        <h3>${teamName}</h3>
+        <span class="dept-reports">Reports to: ${lead.reportsTo}</span>
+      </div>
+    `;
+    const pages = buildDeptScreenPages([lead], {codeClass:'lead', codeLabelFor: () => 'TEAM LEAD'});
+    return {
+      id: lead.slug, dept, tileName: teamName, tileSubtitle: deptStyle[dept.key].tag,
+      stageHeadHtml, pages, photoUrl: deptPhoto[dept.key]
+    };
+  });
+  renderCrtBoard('tl', 'tl-departments', {
+    consoleLabel: 'A-HOUSE // TEAM-TERMINAL',
+    rosterLabel: 'Select team — Department Teams roster',
+    locked: true,
+    groups
+  });
 }
 
 renderMB();
