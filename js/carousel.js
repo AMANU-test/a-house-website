@@ -22,6 +22,15 @@
     let timer = null;
     let settleTimeout = null;
 
+    // If this carousel sits inside a .photo-bg section, that section's blurred
+    // backdrop tracks whichever slide is currently showing, not just the first.
+    const bgSection = root.closest('.photo-bg');
+    function updateBgPhoto(index) {
+      if (!bgSection) return;
+      const img = realSlides[index] && realSlides[index].querySelector('img');
+      if (img) bgSection.style.setProperty('--bg-photo', "url('" + (img.currentSrc || img.src) + "')");
+    }
+
     for (let i = 0; i < count; i++) {
       const tab = document.createElement('button');
       const label = String(i + 1).padStart(2, '0');
@@ -44,6 +53,7 @@
       tabs.forEach(function (t, i) {
         t.classList.toggle('active', i === index);
       });
+      updateBgPhoto(index);
     }
 
     function goTo(i) {

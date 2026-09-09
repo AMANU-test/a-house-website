@@ -126,17 +126,37 @@ header.menu-open .mobile-links{display:flex;}
 .section-head h2{font-family:var(--display); font-size:30px; color:var(--navy);}
 .section-head p{color:var(--slate); margin-top:10px; max-width:560px; font-size:15px;}
 
+/* Role Directory's Org Chart, Management/Executive Board, Department Teams,
+   and Members sections — full-bleed var(--navy), the same dark this page's
+   CTA banner and every page's footer already use, so the CRT consoles (and,
+   inside Org Chart, the reskinned .org-panel below) read as content sitting
+   on a dark page instead of dark islands floating on white. Scoped to this
+   opt-in class rather than .section itself, which every other page still
+   uses in its plain light form. */
+.section-dark{background:var(--navy);}
+.section-dark .eyebrow{color:var(--amber);}
+.section-dark .section-head h2{color:#fff;}
+.section-dark .section-head p{color:#B9C3DC;}
+
 /* Lets Management Board and Executive Board collapse — those grids get long
    once every role is listed out in full. Department Teams uses its own
    tab-row-plus-panel pattern instead (see .tl-tabs below). */
 .tier-title-row{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+/* Recolored to preview the console it opens — a little dark/gold arcade
+   button sitting in an otherwise light section-head, same "dark plaque on a
+   light page" move the CTA banner already makes lower down. Same four
+   colors as the CRT console itself (console gradient, vent gray, tile-tag
+   gold, heading cream) rather than new one-off hex values, so this reads as
+   part of that system instead of a near-miss of it. */
 .tier-toggle{
-  display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12px;
-  font-weight:600; color:var(--navy); background:transparent; border:1px solid var(--line);
-  border-radius:999px; padding:8px 16px; cursor:pointer; white-space:nowrap; transition:.15s ease;
+  display:inline-flex; align-items:center; gap:9px; font-family:'Press Start 2P',monospace; font-size:9px;
+  color:#9fb0e8; background:linear-gradient(155deg, #2a2f3a, #12141a 60%);
+  border:2px solid #3a4051; border-radius:8px; padding:11px 16px; cursor:pointer; white-space:nowrap;
+  transition:.15s ease; box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 6px 14px -8px rgba(10,15,30,.5);
 }
-.tier-toggle:hover{border-color:var(--navy-light); background:#F1F4FA;}
-.tier-toggle .chev{width:8px; height:8px; border-right:1.5px solid var(--navy); border-bottom:1.5px solid var(--navy); transform:rotate(45deg); transition:.2s ease;}
+.tier-toggle:hover{border-color:#cf9a35; color:#fff2c4;}
+.tier-toggle.open{border-color:#cf9a35; color:#f0c15c; box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 0 0 3px rgba(240,166,76,.18);}
+.tier-toggle .chev{width:8px; height:8px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:rotate(45deg); transition:.2s ease;}
 .tier-toggle.open .chev{transform:rotate(-135deg);}
 
 /* Slides open/shut instead of just appearing, via the CSS grid-rows trick:
@@ -157,6 +177,7 @@ header.menu-open .mobile-links{display:flex;}
 .tier-anim.tier-hidden{grid-template-rows:0fr; opacity:0;}
 
 .divider{height:1px; background:var(--line); margin:0;}
+.divider.divider-dark{background:rgba(255,255,255,.14);}
 
 /* ---------- feature row: text + carousel side by side, alternating ---------- */
 .feature-row{display:flex; align-items:center; gap:48px; flex-wrap:wrap;}
@@ -168,6 +189,38 @@ header.menu-open .mobile-links{display:flex;}
 @media (min-width:900px){
   .feature-row.reverse{flex-direction:row-reverse;}
 }
+
+/* Section backdrop: the section's own photo, blurred + dimmed behind the
+   content, instead of flat paper-white — set per-section via the inline
+   --bg-photo custom property. */
+.section.photo-bg{position:relative; overflow:hidden;}
+.section.photo-bg::before{
+  content:"";
+  position:absolute; inset:-20px;
+  background-image:var(--bg-photo);
+  background-size:cover;
+  background-position:center;
+  filter:blur(10px) saturate(1.15);
+  transition:background-image .25s ease;
+  z-index:0;
+}
+.section.photo-bg::after{
+  content:"";
+  position:absolute; inset:0;
+  /* Same dark-navy wash as .hero-photo, so the two feel like one family
+     instead of the hero being dark and everything below going flat white.
+     Starts near-solid at the very top edge (matching the hero's own fade to
+     that same tone right above it) before relaxing, so back-to-back photo
+     sections meet as one continuous dark band instead of a hard seam. */
+  background:linear-gradient(180deg, rgba(9,15,32,.97) 0%, rgba(9,15,32,.86) 10%, rgba(9,15,32,.9) 55%, rgba(9,15,32,.94) 100%);
+  z-index:0;
+}
+.section.photo-bg > .wrap{position:relative; z-index:1;}
+
+/* Text flips to light-on-dark to match the darker backdrop. */
+.section.photo-bg .feature-text h2{color:#fff;}
+.section.photo-bg .feature-text p.hook{color:#fff;}
+.section.photo-bg .feature-text p{color:rgba(255,255,255,.72);}
 
 /* ---------- grids & cards ---------- */
 .grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:16px;}
@@ -220,20 +273,50 @@ header.menu-open .mobile-links{display:flex;}
   box-shadow: 5px 12px 20px rgba(0,0,0,.32);
 }
 .kw-grid .card::before{
-  /* pushpin head */
+  /* pushpin head — a glossy dome (bright highlight near the top-left,
+     saturated color through the middle, a dark rim at the edge) rather
+     than a flat tinted circle, closer to the reference photo's plastic
+     thumbtacks. */
   content:"";
   position:absolute;
-  top:-9px; left:50%;
-  width:16px; height:16px;
-  margin-left:-8px;
+  top:-12px; left:50%;
+  width:19px; height:19px;
+  margin-left:-9.5px;
   border-radius:50%;
-  background: var(--pin, radial-gradient(circle at 32% 30%, #8fb4ff, #2451c9));
-  box-shadow: 0 3px 3px rgba(0,0,0,.4);
+  background: var(--pin, radial-gradient(circle at 32% 26%, #fff 0%, #fff 8%, #6ea8ff 22%, #2455d9 58%, #12277a 100%));
+  box-shadow:
+    inset 0 -4px 5px rgba(0,0,0,.4),
+    inset 0 2px 3px rgba(255,255,255,.6),
+    1px 4px 4px rgba(0,0,0,.4);
+  z-index:2;
 }
-.kw-grid .card:nth-child(1){ --tilt: -2deg; background:#C3E6D1; }
-.kw-grid .card:nth-child(2){ --tilt: 1.5deg; background:#F6CE8F; --pin: radial-gradient(circle at 32% 30%, #fff, #d6d6d6); }
-.kw-grid .card:nth-child(3){ --tilt: -1.5deg; background:#EAEE8E; --pin: radial-gradient(circle at 32% 30%, #7fd88a, #1f8f3b); }
-.kw-grid .card:nth-child(4){ --tilt: 2deg; background:#D3EAA3; --pin: radial-gradient(circle at 32% 30%, #ff9c7f, #d6401c); }
+.kw-grid .card::after{
+  /* the metal point, just visible below the head where it meets the paper */
+  content:"";
+  position:absolute;
+  top:5px; left:50%;
+  width:2px; height:8px;
+  margin-left:-1px;
+  background: linear-gradient(90deg, #8a9198, #f1f3f4 45%, #8a9198);
+  box-shadow: 0 1px 2px rgba(0,0,0,.35);
+  z-index:1;
+}
+.kw-grid .card:nth-child(1){
+  --tilt: -2deg; background:#C3E6D1;
+  --pin: radial-gradient(circle at 32% 26%, #fff 0%, #fff 8%, #ff5a5a 22%, #d9272b 58%, #7a1418 100%);
+}
+.kw-grid .card:nth-child(2){
+  --tilt: 1.5deg; background:#F6CE8F;
+  --pin: radial-gradient(circle at 32% 26%, #fff 0%, #fff 8%, #c98bff 22%, #7b2fd1 58%, #3d1466 100%);
+}
+.kw-grid .card:nth-child(3){
+  --tilt: -1.5deg; background:#EAEE8E;
+  --pin: radial-gradient(circle at 32% 26%, #fff 0%, #fff 8%, #7be08a 22%, #1f9e3e 58%, #0f4f1f 100%);
+}
+.kw-grid .card:nth-child(4){
+  --tilt: 2deg; background:#D3EAA3;
+  --pin: radial-gradient(circle at 32% 26%, #fff 0%, #fff 8%, #ffe066 22%, #e0a11c 58%, #7a5610 100%);
+}
 @media (max-width:760px){
   .kw-grid .card{ transform:none; }
   .kw-grid .card:hover{ transform: translateY(-3px); }
@@ -583,6 +666,20 @@ header.menu-open .mobile-links{display:flex;}
    like every other section's content on this page (section-head text included)
    rather than centered, which read as a stray column adrift in whitespace. */
 .tracks-stack{display:flex; flex-direction:column; gap:16px; max-width:520px;}
+/* Members' two track cards get the same dark/gold console plaque treatment
+   as Management/Executive/Department Teams' expanded panels — scoped to
+   .tracks-stack .card specifically (not .card itself, which other sections
+   of this site still use in its plain light form) so only these two cards
+   pick up the reskin. */
+.tracks-stack .card{
+  background:linear-gradient(155deg, #2a2f3a, #12141a 60%); border:2px solid #3a4051;
+  box-shadow:0 14px 30px -18px rgba(10,15,30,.5), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.tracks-stack .card:hover{border-color:#cf9a35; box-shadow:0 14px 30px -14px rgba(10,15,30,.6), inset 0 1px 0 rgba(255,255,255,.08);}
+.tracks-stack .card-code{font-family:'Press Start 2P',monospace; font-size:9px; color:#cf9a35;}
+.tracks-stack .card h3{font-family:'Rajdhani',sans-serif; font-weight:700; font-style:italic; color:#fff2c4;}
+.tracks-stack .card .lead{color:#c7d2f2;}
+.tracks-stack .card-meta{color:#8a94a8;}
 .card{
   background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
   padding:22px 22px 20px; transition:.18s ease; scroll-margin-top:90px;
@@ -613,27 +710,6 @@ header.menu-open .mobile-links{display:flex;}
 .card h2, .card h3{font-family:var(--display); font-size:19px; color:var(--navy); margin-top:10px; line-height:1.25;}
 .card .lead{font-size:13.5px; color:var(--slate); margin-top:8px;}
 .card-meta{font-family:var(--mono); font-size:11px; color:var(--slate-soft); margin-top:10px; line-height:1.6;}
-.card-toggle{
-  margin-top:16px; display:flex; align-items:center; gap:8px;
-  font-family:var(--mono); font-size:12px; color:var(--navy); font-weight:600;
-}
-.chev{width:9px; height:9px; border-right:1.5px solid var(--navy); border-bottom:1.5px solid var(--navy);
-  transform:rotate(45deg); transition:.2s ease;}
-.card.open .chev{transform:rotate(-135deg);}
-
-.card-detail{max-height:0; overflow:hidden; transition:max-height .3s ease;}
-.card-detail-inner{padding-top:18px; border-top:1px solid var(--line); margin-top:16px;}
-.detail-block{margin-bottom:16px;}
-.detail-block:last-child{margin-bottom:0;}
-.detail-block h4{
-  font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:.06em;
-  color:var(--slate); margin-bottom:8px;
-}
-.detail-block ul{padding-left:18px; list-style:disc;}
-.detail-block li{font-size:14px; color:var(--ink); margin-bottom:6px;}
-.detail-block li strong{font-weight:600;}
-.detail-block li ul{margin-top:5px;}
-.detail-block li ul li{color:var(--slate); font-size:13.5px;}
 .skills-tags{display:flex; flex-wrap:wrap; gap:8px;}
 .skill-tag{
   font-size:12.5px; background:#F1F4FA; color:var(--navy); padding:6px 11px;
@@ -840,37 +916,303 @@ footer .wrap{padding:56px 28px 32px;}
 .org-legend i{width:9px; height:9px; border-radius:50%; display:inline-block;}
 .org-legend i.outline{background:#FAFBFD; border:1px dashed #C7CEDC;}
 
-/* ---------- department teams: tab row + shared panel ---------- */
-/* Six departments side by side as tabs, not stacked as six rows — one shared
-   panel below shows whichever department is selected, so it reads as one
-   thing expanding to cover the space under the row rather than six
-   independent accordions pushing the page around. The panel uses the same
-   .tier-anim grid-rows technique as the rest of this page's expand/collapse
-   (see .tier-anim above) — that animates to the content's true height, not a
+/* Org Chart stays on the page's plain light background (unlike Management/
+   Executive Board, Department Teams, and Members below) — the dark charcoal
+   .org-panel this used to have made its small mono labels and grid lines
+   hard to read, so this section opts out of .section-dark entirely rather
+   than trying to fix contrast on a dark panel this text-dense. */
+
+/* ---------- department selector: "choose your character" tiles + shared stage ---------- */
+/* Shared by all three org tiers (Management Board, Executive Board,
+   Department Teams) — a row of colored department tiles, one per
+   department, each with its own color + two-letter tag (see deptStyle in
+   directory.js) like a character-select portrait. One stage panel below
+   shows whichever department is selected, so it reads as one thing
+   expanding to cover the space under the row rather than six independent
+   accordions pushing the page around. The stage uses the same .tier-anim
+   grid-rows technique as the rest of this page's expand/collapse (see
+   .tier-anim above) — that animates to the content's true height, not a
    guessed ceiling, so a role card's own "View full responsibilities"
-   growing *inside* an already-open panel can't get clipped. */
-.tl-tabs{display:grid; grid-template-columns:repeat(6, 1fr); gap:8px;}
-.tl-tab{
-  font-family:var(--display); font-weight:700; font-size:13px; line-height:1.25;
-  text-align:center; padding:14px 10px; cursor:pointer;
-  background:var(--card); color:var(--slate); border:1px solid var(--line);
-  border-radius:var(--radius); transition:.15s ease;
+   growing *inside* an already-open stage can't get clipped. */
+.dept-select{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:14px;}
+.dept-tile{
+  display:flex; align-items:center; gap:12px; text-align:left;
+  padding:11px 14px; cursor:pointer;
+  background:var(--card); border:2px solid var(--line); border-radius:14px;
+  transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
 }
-.tl-tab:hover{color:var(--navy); border-color:var(--navy-light);}
-.tl-tab.active{color:var(--navy); border-color:var(--navy-light); box-shadow:0 2px 0 var(--navy-light) inset;}
-.tl-panel{
-  margin-top:12px; background:var(--card); border:1px solid var(--navy-light);
+.dept-tile:hover{transform:translateY(-2px); border-color:var(--dept-color); box-shadow:0 10px 20px -14px var(--dept-color);}
+.dept-tile.active{
+  border-color:var(--dept-color);
+  background:color-mix(in srgb, var(--dept-color) 9%, white);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--dept-color) 22%, transparent);
+}
+.dept-avatar{
+  flex:0 0 auto; width:40px; height:40px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-weight:700; font-size:12.5px; color:#fff;
+  background:var(--dept-color); border:2px solid var(--navy);
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.22), inset 0 2px 0 rgba(255,255,255,.35);
+  transition:box-shadow .15s ease, transform .15s ease;
+}
+.dept-tile:hover .dept-avatar, .dept-tile.active .dept-avatar{transform:scale(1.08);}
+.dept-tile.active .dept-avatar{box-shadow:inset 0 -3px 0 rgba(0,0,0,.22), inset 0 2px 0 rgba(255,255,255,.35), 0 0 0 4px color-mix(in srgb, var(--dept-color) 32%, transparent);}
+.dept-tile-name{display:block; font-family:var(--display); font-weight:700; font-size:13px; line-height:1.25; color:var(--navy);}
+.dept-tile-tag{display:block; font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--slate-soft); margin-top:2px;}
+/* The "screen" — one department's stage, sitting above its row of tiles (a
+   cabinet's display above its character-select buttons). A thick colored
+   bezel (var(--dept-color), set by selectDeptTab) stands in for the glow a
+   real screen would cast, so the whole stack still reads as "this button row
+   controls that screen" without needing to draw a literal console frame. */
+.dept-stage{
+  background:var(--card); border:3px solid var(--dept-color, var(--navy-light));
   border-radius:var(--radius); box-shadow:0 16px 32px -20px rgba(22,39,79,.35);
-  padding:22px;
+  padding:22px; transition:border-color .2s ease;
 }
-.tl-panel-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:16px;}
-.tl-panel-head h3{font-family:var(--display); font-size:17px; color:var(--navy); margin:0;}
-.tl-dept-reports{font-family:var(--mono); font-size:11px; color:var(--slate-soft);}
+.dept-stage-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:16px;}
+.dept-stage-head h3{font-family:var(--display); font-size:17px; color:var(--navy); margin:0;}
+.dept-reports{font-family:var(--mono); font-size:11px; color:var(--slate-soft);}
+
+/* The screen's own content: three pages (Overview, Key Responsibilities,
+   Skills & Competencies) you swipe/scroll between horizontally, snapping one
+   full page at a time — same scroll-snap technique as the photo carousels
+   elsewhere on the site (see js/carousel.js), just carrying text instead of
+   images, and with no autoplay since this is meant to be read, not watched. */
+.dept-screen-track{
+  display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth;
+  scrollbar-width:none; -ms-overflow-style:none; margin:0 -2px;
+  /* Locked by lockScreenHeight() in directory.js to the tallest page across
+     every department in this tier, so swiping pages or switching between a
+     short department and a long one never resizes the screen around it. */
+  min-height:var(--screen-min-h, auto);
+}
+.dept-screen-track::-webkit-scrollbar{display:none;}
+.dept-screen-page{flex:0 0 100%; min-width:0; scroll-snap-align:start; padding:2px;}
+.dept-screen-nav{display:flex; gap:6px; margin-top:18px; padding-top:16px; border-top:1px solid var(--line); flex-wrap:wrap;}
+.dept-screen-dot{
+  font-family:var(--mono); font-size:11px; letter-spacing:.02em;
+  color:var(--slate-soft); background:transparent; border:1px solid var(--line);
+  border-radius:999px; padding:6px 12px; cursor:pointer; transition:.15s ease;
+}
+.dept-screen-dot:hover{color:var(--navy); border-color:var(--dept-color, var(--navy-light));}
+.dept-screen-dot.active{
+  color:#fff; background:var(--dept-color, var(--navy)); border-color:var(--dept-color, var(--navy));
+  font-weight:600;
+}
+
+.dept-role-block .card-code{display:block; margin-bottom:6px;}
+.dept-role-block h4{font-family:var(--display); font-size:16px; color:var(--navy); margin-top:2px;}
+.dept-role-block p{font-size:14px; color:var(--slate); margin-top:6px; line-height:1.55;}
+.dept-role-block ul{padding-left:18px; list-style:disc;}
+.dept-role-block li{font-size:14px; color:var(--ink); margin-bottom:8px; line-height:1.5;}
+.dept-role-block li strong{font-weight:600;}
+.dept-role-block + .dept-role-block{margin-top:16px; padding-top:16px; border-top:1px solid var(--line);}
+
+/* ==========================================================================
+   Management Board & Executive Board: "CRT terminal" console
+   Built fresh for this codebase (not copied from any reference mockup) but
+   matching that reference's aesthetic — a game-cabinet console housing a
+   glass screen. Management Board shows real headshots of the six Chiefs
+   (assets/roster/*.png, chroma-keyed — see the processing script, not
+   generated) standing in for the plain letter-tag avatars used everywhere
+   else on this page. Executive Board reuses the exact same photo cutouts
+   (same body/pose silhouettes, no separate Head photoshoot exists) but runs
+   them through .crt-console--locked's filter:brightness(0), turning each
+   into a flat black silhouette — an unlockable-character-select look, not a
+   photo of the Head. Every element here reuses the exact same dept-select/
+   dept-tile/dept-stage/dept-screen-* markup and JS (renderDeptSelector,
+   selectDeptTab) as Department Teams — this block only overrides their
+   *appearance* when nested inside .crt-content, so none of the
+   selection/paging logic is duplicated or at risk of drifting out of sync.
+   ========================================================================== */
+.crt-console{
+  margin-top:22px;
+  background:linear-gradient(155deg, #2a2f3a, #12141a 60%);
+  border-radius:24px; padding:16px; border:2px solid var(--orange);
+  box-shadow:0 22px 48px rgba(10,15,30,.4), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.crt-console-topbar{display:flex; align-items:center; gap:8px; padding:2px 8px 12px;}
+.crt-led{width:8px; height:8px; border-radius:50%; background:#3ddc6e; box-shadow:0 0 6px #3ddc6e;}
+.crt-console-label{font-family:var(--mono); font-size:10px; letter-spacing:.15em; color:#8a94a8; text-transform:uppercase;}
+.crt-vents{margin-left:auto; display:flex; gap:3px;}
+.crt-vents span{width:3px; height:10px; background:#3a4051; border-radius:1px;}
+
+.crt-screen{
+  position:relative; overflow:hidden; border-radius:14px;
+  background:radial-gradient(120% 90% at 50% -10%, #3a55b8 0%, #16234f 55%, #0c1636 100%);
+  padding:26px 22px 24px;
+  box-shadow:inset 0 0 60px rgba(0,0,0,.4);
+}
+.crt-watermark{
+  position:absolute; inset:-20% -10%; z-index:0; pointer-events:none; opacity:.06;
+  font-family:'Press Start 2P',monospace; font-size:44px; color:#fff; white-space:nowrap;
+  transform:rotate(-8deg); line-height:2.4;
+}
+/* The Chief for whichever department is selected, bleeding in from the
+   right edge of the screen — a nod to the reference mockup's flanking
+   character-select portraits (Ryu/Ken). Swapped and re-triggered by
+   crtEnterCharacter() in directory.js; empty src / no .active class means
+   nothing is selected yet, so it's simply invisible. */
+.crt-enter-photo{
+  position:absolute; right:2%; top:2%; z-index:1; pointer-events:none;
+  height:62%; width:auto; max-width:24%; object-fit:cover; object-position:top center;
+  opacity:0; transform:translateX(50px);
+  -webkit-mask-image:linear-gradient(90deg, transparent, #000 30%);
+  mask-image:linear-gradient(90deg, transparent, #000 30%);
+  filter:drop-shadow(-14px 0 28px rgba(0,0,0,.55));
+}
+.crt-enter-photo.active{opacity:.5; transform:translateX(0); transition:opacity .3s ease, transform .3s cubic-bezier(.2,.8,.2,1);}
+.crt-enter-photo.entering{animation:crt-enter .55s cubic-bezier(.16,1,.3,1);}
+@keyframes crt-enter{
+  from{transform:translateX(160px); opacity:0;}
+  to{transform:translateX(0); opacity:.5;}
+}
+.crt-scanlines{
+  position:absolute; inset:0; pointer-events:none; z-index:3;
+  background:repeating-linear-gradient(to bottom, rgba(255,255,255,.04) 0px, rgba(255,255,255,.04) 1px, transparent 1px, transparent 3px);
+  mix-blend-mode:overlay; opacity:.6;
+}
+.crt-content{position:relative; z-index:2;}
+.crt-roster-label{
+  margin:26px 0 12px; font-family:'Rajdhani',sans-serif; font-weight:700; font-style:italic;
+  letter-spacing:.08em; text-transform:uppercase; color:#dfe6ff; font-size:13px;
+  text-shadow:0 2px 0 rgba(0,0,0,.4);
+}
+
+/* Section head + stage, re-skinned light-on-dark for the glass screen. */
+.crt-content .dept-stage{background:transparent; border:none; box-shadow:none; padding:0 0 22px;}
+.crt-content .dept-stage-head h3{
+  font-family:'Press Start 2P',monospace; font-size:clamp(15px,2.2vw,20px); line-height:1.5;
+  background:linear-gradient(180deg,#fff2c4,#f0c15c 55%,var(--orange));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 3px 0 rgba(0,0,0,.45));
+}
+.crt-content .dept-reports{
+  font-family:'Rajdhani',sans-serif; font-weight:700; font-style:italic; letter-spacing:.04em;
+  color:#dfe6ff; font-size:13px; text-shadow:0 2px 0 rgba(0,0,0,.4);
+}
+.crt-content .dept-screen-nav{border-top-color:rgba(255,255,255,.14);}
+.crt-content .dept-screen-dot{
+  font-family:'Press Start 2P',monospace; font-size:8.5px; letter-spacing:.02em;
+  padding:10px 12px; border-radius:6px; color:#9fb0e8;
+  background:rgba(255,255,255,.06); border:2px solid rgba(255,255,255,.18);
+}
+.crt-content .dept-screen-dot:hover{color:#fff; border-color:rgba(255,255,255,.4);}
+.crt-content .dept-screen-dot.active{
+  background:linear-gradient(180deg,#f0c15c,#cf9a35); color:#3a2405;
+  box-shadow:0 0 0 2px #fff, 0 0 14px rgba(255,255,255,.35);
+  border-color:rgba(0,0,0,.25);
+}
+.crt-content .dept-role-block .card-code{color:#cf9a35; font-family:'Press Start 2P',monospace; font-size:8px;}
+.crt-content .dept-role-block h4{color:#fff2c4; font-family:'Rajdhani',sans-serif; font-weight:700; font-style:italic; font-size:16px;}
+.crt-content .dept-role-block p{color:#c7d2f2;}
+.crt-content .dept-role-block li{color:#dfe6ff;}
+.crt-content .dept-role-block li strong{color:#fff;}
+.crt-content .dept-role-block + .dept-role-block{border-top-color:rgba(255,255,255,.14);}
+.crt-content .skill-tag{background:rgba(255,255,255,.08); color:#dfe6ff; border-color:rgba(255,255,255,.2);}
+
+/* Fighter-select roster grid — same .dept-select/.dept-tile as every other
+   tier, restyled as photo tiles in a 6-across console tray. */
+.crt-content .dept-select{
+  grid-template-columns:repeat(6, 1fr); gap:10px; margin-top:0;
+  background:rgba(8,14,36,.55); border:2px solid rgba(255,255,255,.15);
+  border-radius:10px; padding:14px;
+}
+/* Department Teams has 14 tiles (one per team, not per department) instead
+   of the 6 Management/Executive Board work with — auto-fill lets the tray
+   pack in as many as fit per row and wrap the rest, instead of forcing 14
+   tiles into 6 too-wide columns. The #id beats the .class rule above without
+   needing !important. */
+#tl-departments-inner .dept-select{
+  grid-template-columns:repeat(auto-fill, minmax(92px, 1fr));
+}
+.crt-content .dept-tile{
+  position:relative; flex-direction:column; align-items:stretch; gap:0; padding:0;
+  background:transparent; border:none; border-radius:8px; overflow:hidden; cursor:pointer;
+  transition:transform .25s cubic-bezier(.2,.8,.2,1);
+}
+.crt-content .dept-tile:hover{transform:translateY(-2px); box-shadow:none;}
+/* Selecting a tile "pops" it slightly above its neighbors and un-zooms the
+   photo inside — the default crop below is a touch tighter than the frame
+   (img sized/offset past 100%) so something like Talent's raised elbow sits
+   just outside it; picking that tile relaxes the img back to 100%, pushing
+   the crop outward enough to bring the cropped-off part back into frame. */
+.crt-content .dept-tile.active{transform:scale(1.07); z-index:2;}
+.crt-content .dept-tile > span:last-of-type{display:block; width:100%;}
+.crt-content .dept-avatar-photo{
+  width:100%; height:auto; aspect-ratio:4/5; border-radius:0; border:2px solid rgba(0,0,0,.25);
+  position:relative; overflow:hidden; display:block; background:none; box-shadow:none;
+}
+.crt-content .dept-avatar-photo img{
+  position:absolute; top:-9%; left:-9%; width:118%; height:118%;
+  object-fit:cover; object-position:50% 12%; display:block; z-index:1;
+  transition:top .25s cubic-bezier(.2,.8,.2,1), left .25s cubic-bezier(.2,.8,.2,1),
+             width .25s cubic-bezier(.2,.8,.2,1), height .25s cubic-bezier(.2,.8,.2,1);
+}
+.crt-content .dept-tile.active .dept-avatar-photo img{top:0; left:0; width:100%; height:100%;}
+.crt-content .dept-avatar-photo::before,
+.crt-content .dept-avatar-photo::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(160deg, color-mix(in srgb, var(--dept-color) 78%, white), color-mix(in srgb, var(--dept-color) 55%, black));
+}
+.crt-content .dept-avatar-photo::before{z-index:0;}
+.crt-content .dept-avatar-photo::after{z-index:2; mix-blend-mode:soft-light; opacity:.5;}
+.crt-content .dept-tile:hover .dept-avatar-photo,
+.crt-content .dept-tile.active .dept-avatar-photo{transform:none;}
+.crt-content .dept-avatar-tag{
+  position:absolute; top:5px; left:5px; z-index:3;
+  font-family:'Press Start 2P',monospace; font-size:8px; color:#fff;
+  background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.35);
+  border-radius:4px; padding:3px 5px; letter-spacing:.03em;
+}
+.crt-content .dept-tile-name{
+  font-family:'Rajdhani',sans-serif; font-weight:700; font-style:italic; text-align:center;
+  font-size:11.5px; letter-spacing:.02em; padding:6px 4px 3px; color:#fff;
+  background:linear-gradient(180deg, rgba(10,16,40,.92), rgba(10,16,40,.78));
+}
+.crt-content .dept-tile-tag{
+  font-family:'Press Start 2P',monospace; font-size:6.5px; letter-spacing:.05em; text-align:center;
+  color:#cf9a35; padding:0 0 7px; margin-top:0;
+  background:rgba(10,16,40,.78); display:block;
+}
+.crt-content .dept-tile.active .dept-avatar-photo{
+  box-shadow:0 0 0 3px #fff, 0 0 0 6px #cf9a35, 0 0 20px rgba(255,255,255,.55);
+}
+.crt-content .dept-tile.active::before{
+  content:"▲"; position:absolute; top:-14px; left:50%; transform:translate(-50%,0); z-index:4;
+  color:#cf9a35; font-size:13px; animation:crt-bob 1s ease-in-out infinite;
+}
+@keyframes crt-bob{0%,100%{transform:translate(-50%,0);} 50%{transform:translate(-50%,6px);}}
+
+/* Executive Board: same console, "not unlocked yet" vibe. The Heads don't
+   have their own photoshoot, so this reuses the Chiefs' cutouts purely for
+   their body-shape/pose silhouettes — brightness(0) crushes every opaque
+   pixel to pure black while leaving the chroma-keyed alpha edge untouched,
+   so it reads as a blacked-out character silhouette, not a Chief's photo.
+   Department color + tag still show through so the roster stays scannable;
+   only the person is anonymized. Red LED (vs. Management Board's green)
+   echoes the "locked" read. */
+.crt-console--locked .crt-led{background:#e5484d; box-shadow:0 0 6px #e5484d;}
+.crt-console--locked .dept-avatar-photo img,
+.crt-console--locked .crt-enter-photo{
+  filter:brightness(0);
+}
+
+@media (max-width:900px){
+  .crt-watermark{font-size:32px;}
+}
+@media (max-width:760px){
+  .crt-content .dept-select{grid-template-columns:repeat(3, 1fr);}
+  .crt-screen{padding:20px 16px 18px;}
+}
+@media (max-width:460px){
+  .crt-content .dept-select{grid-template-columns:repeat(2, 1fr);}
+}
 @media (max-width: 900px){
-  .tl-tabs{grid-template-columns:repeat(3, 1fr);}
+  .dept-select{grid-template-columns:repeat(2, 1fr);}
 }
 @media (max-width: 560px){
-  .tl-tabs{grid-template-columns:repeat(2, 1fr);}
+  .dept-select{grid-template-columns:1fr;}
 }
 
 /* ---------- org chart: project teams branch ---------- */
@@ -1128,7 +1470,11 @@ footer .wrap{padding:56px 28px 32px;}
   content:""; position:absolute; inset:0; z-index:1;
   background:
     linear-gradient(100deg, rgba(9,15,32,.92) 0%, rgba(9,15,32,.72) 42%, rgba(9,15,32,.35) 75%, rgba(9,15,32,.18) 100%),
-    linear-gradient(0deg, rgba(9,15,32,.5) 0%, rgba(9,15,32,0) 40%);
+    linear-gradient(0deg, rgba(9,15,32,.5) 0%, rgba(9,15,32,0) 40%),
+    /* Darkens to near-solid navy right at the bottom edge so a .photo-bg
+       section starting right after this one (e.g. events.html) blends into
+       it instead of cutting from photo to photo at full brightness. */
+    linear-gradient(180deg, rgba(9,15,32,0) 82%, rgba(9,15,32,.97) 100%);
 }
 .hero-photo .subnav{border-top-color:rgba(255,255,255,.25);}
 .hero-photo .subnav a{background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.3); color:#fff;}
