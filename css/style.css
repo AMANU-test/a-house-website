@@ -981,9 +981,14 @@ footer .wrap{padding:56px 28px 32px;}
 .dept-screen-track{
   display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth;
   scrollbar-width:none; -ms-overflow-style:none; margin:0 -2px;
-  /* Locked by lockScreenHeight() in directory.js to the tallest page across
-     every department in this tier, so swiping pages or switching between a
-     short department and a long one never resizes the screen around it. */
+  /* Set by lockScreenHeight() in directory.js, per department (this
+     variable is set directly on each department's own track, not
+     inherited from a shared ancestor) — the tallest of that one
+     department's 3 pages, so swiping between them never resizes the
+     screen. Switching to a different department is allowed to resize it;
+     locking every department in the tier to one shared height meant a
+     long "Key Responsibilities" elsewhere was forcing a short "Skills"
+     page here into mostly empty space. */
   min-height:var(--screen-min-h, auto);
 }
 .dept-screen-track::-webkit-scrollbar{display:none;}
@@ -1073,6 +1078,9 @@ footer .wrap{padding:56px 28px 32px;}
   mix-blend-mode:overlay; opacity:.6;
 }
 .crt-content{position:relative; z-index:2;}
+/* Bottom-right, not left — .crt-screen has overflow:hidden (a BFC), so the
+   float is fully contained without needing a clearfix element after it. */
+.crt-hide-btn{position:relative; z-index:2; margin:22px 0 0; float:right;}
 .crt-roster-label{
   margin:26px 0 12px; font-family:'Rajdhani',sans-serif; font-weight:700; font-style:italic;
   letter-spacing:.08em; text-transform:uppercase; color:#dfe6ff; font-size:13px;
@@ -1081,11 +1089,29 @@ footer .wrap{padding:56px 28px 32px;}
 
 /* Section head + stage, re-skinned light-on-dark for the glass screen. */
 .crt-content .dept-stage{background:transparent; border:none; box-shadow:none; padding:0 0 22px;}
+/* Stacked instead of the base rule's inline baseline row: with the title
+   sitting next to "Reports to…", whether that second bit fit on the same
+   line or got pushed to its own depended on how wide the title itself
+   rendered — a "Reports to" that wraps under a long title adds a whole
+   extra line's height on top of the title's own min-height below, right
+   back to inconsistent console sizes it was meant to fix. Stacking removes
+   that width-dependent branch entirely: "Reports to" is always its own
+   line, for every department. */
+.crt-content .dept-stage-head{flex-direction:column; align-items:flex-start; gap:2px;}
 .crt-content .dept-stage-head h3{
   font-family:'Press Start 2P',monospace; font-size:clamp(15px,2.2vw,20px); line-height:1.5;
   background:linear-gradient(180deg,#fff2c4,#f0c15c 55%,var(--orange));
   -webkit-background-clip:text; background-clip:text; color:transparent;
   filter:drop-shadow(0 3px 0 rgba(0,0,0,.45));
+  /* Department names range from two words ("Operations Department") to
+     four ("Engagement & Relations Department") — at plenty of widths that's
+     the difference between one line and two, which was quietly undoing the
+     equal-size console fix below: two departments could share the exact
+     same --screen-min-h and still end up with consoles ~30px apart because
+     one's title wrapped and the other's didn't. em-based so it always
+     reserves exactly two lines of *this* text's own size, matching
+     whatever the clamp() above currently resolves to at this width. */
+  min-height:calc(1.5em * 2);
 }
 .crt-content .dept-reports{
   font-family:'Rajdhani',sans-serif; font-weight:700; font-style:italic; letter-spacing:.04em;
@@ -1110,6 +1136,24 @@ footer .wrap{padding:56px 28px 32px;}
 .crt-content .dept-role-block li strong{color:#fff;}
 .crt-content .dept-role-block + .dept-role-block{border-top-color:rgba(255,255,255,.14);}
 .crt-content .skill-tag{background:rgba(255,255,255,.08); color:#dfe6ff; border-color:rgba(255,255,255,.2);}
+
+/* lockScreenHeight (directory.js) now caps --screen-min-h at the shortest
+   department's own height instead of each department's own tallest page —
+   so every console in a tier reads as the same size. `height` (not the
+   base rule's `min-height`) is what actually enforces the cap downward for
+   a department whose longest page exceeds it; that page then scrolls
+   internally (overflow-y here) rather than stretching the console past the
+   shared size. A themed scrollbar replaces the browser default so it reads
+   as part of the console, not a generic OS control; it only ever appears
+   when a page's content actually exceeds the cap. */
+.crt-content .dept-screen-track{height:var(--screen-min-h, auto);}
+.crt-content .dept-screen-page{
+  overflow-y:auto; overflow-x:hidden;
+  scrollbar-width:thin; scrollbar-color:#cf9a35 rgba(255,255,255,.08);
+}
+.crt-content .dept-screen-page::-webkit-scrollbar{width:6px;}
+.crt-content .dept-screen-page::-webkit-scrollbar-track{background:rgba(255,255,255,.08); border-radius:4px;}
+.crt-content .dept-screen-page::-webkit-scrollbar-thumb{background:#cf9a35; border-radius:4px;}
 
 /* Fighter-select roster grid — same .dept-select/.dept-tile as every other
    tier, restyled as photo tiles in a 6-across console tray. */
@@ -1204,6 +1248,52 @@ footer .wrap{padding:56px 28px 32px;}
 @media (max-width:760px){
   .crt-content .dept-select{grid-template-columns:repeat(3, 1fr);}
   .crt-screen{padding:20px 16px 18px;}
+  .crt-console{padding:10px;}
+  /* At phone widths the entering photo has no dedicated column of its own
+     (it's an absolutely-positioned overlay, .crt-content sits on top of it
+     at full width) — it just sits behind the description text, half-hidden
+     and making already-long copy harder to read for no real payoff at this
+     size. Description + roster fitting in view matters more here than the
+     slide-in flourish, so it's dropped entirely rather than shrunk further. */
+  .crt-enter-photo{display:none;}
+  /* "Choose your character" roster, minimized for phone: the photo portrait
+     is what was crowding the description off-screen (each tile is a 4/5
+     aspect-ratio image, so 3-6 of them stack into real height) — dropped
+     entirely rather than shrunk further, same call as the entering photo
+     above. Each tile becomes a plain, compact labeled button instead; the
+     department's own --dept-color (already set inline per tile — see
+     renderDeptSelector in directory.js) moves to a left-edge accent so
+     tiles are still tellable apart without a face. */
+  .crt-content .dept-avatar-photo{display:none;}
+  .crt-content .dept-tile{
+    flex-direction:row; align-items:center; gap:0; padding:10px 12px;
+    border-radius:8px; background:rgba(255,255,255,.06);
+    border-left:4px solid var(--dept-color, #cf9a35);
+  }
+  .crt-content .dept-tile:hover{transform:none; background:rgba(255,255,255,.1);}
+  .crt-content .dept-tile.active{
+    transform:none;
+    background:color-mix(in srgb, var(--dept-color, #cf9a35) 30%, rgba(255,255,255,.06));
+    box-shadow:inset 0 0 0 2px var(--dept-color, #cf9a35);
+  }
+  /* The "▲ picked!" indicator floats above the (now-hidden) photo — with no
+     face to point at it would just hang in the tile's empty top-left. */
+  .crt-content .dept-tile.active::before{content:none;}
+  .crt-content .dept-tile > span:last-of-type{width:auto;}
+  .crt-content .dept-tile-name{background:none; padding:0; text-align:left; font-size:11px; line-height:1.3;}
+  .crt-content .dept-tile-tag{background:none; padding:0; text-align:left;}
+  /* min-height can only make a box taller than its content needs, never
+     shorter — .dept-screen-track is a flex row holding all 3 pages at
+     once, so its natural height is already the tallest of them regardless
+     of what --screen-min-h says. Above this width that's fine (the
+     department-wide lock IS that same tallest-page number, so min-height
+     is redundant with — not fighting — the natural flex sizing). Below it,
+     syncMobilePageHeight (directory.js) sets --screen-min-h to just the
+     one page currently swiped into view, which is often shorter than a
+     sibling page — an explicit height (not min-height) is what actually
+     enforces that, clipping the taller siblings instead of growing to fit
+     them. */
+  .dept-screen-track{height:var(--screen-min-h, auto); min-height:0; overflow-y:hidden;}
 }
 @media (max-width:460px){
   .crt-content .dept-select{grid-template-columns:repeat(2, 1fr);}
