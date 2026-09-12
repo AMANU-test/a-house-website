@@ -28,6 +28,12 @@ body{
   font-family:var(--body);
   line-height:1.5;
   -webkit-font-smoothing:antialiased;
+  /* Companion to .tower-backdrop's 100vw full-bleed trick on the About page
+     — 100vw can run a hair wider than the visual viewport on browsers that
+     reserve scrollbar space, which would otherwise show as a few px of
+     horizontal scroll. Safe sitewide since nothing here relies on
+     horizontal scrolling. */
+  overflow-x:hidden;
 }
 a{color:inherit;}
 img,svg{display:block; max-width:100%;}
@@ -386,278 +392,217 @@ header.menu-open .mobile-links{display:flex;}
   .cloud-grid .card{ animation:none; }
 }
 
-/* ---------- About page: Core Competencies as a LEGO house (H-O-M-E) ----------
-   A stepped pyramid of individual brick rectangles for the roof (not a
-   smooth triangle), an off-white brick wall, four window "plates" each
-   capped in one of the H-O-M-E colors, and a green baseplate row underneath.
-   Bricks are told apart by seam lines (borders between them), not studs —
-   a single stud on a small letter tile read as a stray dot rather than a
-   real connector, so none of the pieces here get one. */
-.lego-house{
-  max-width:660px; margin:50px auto 0; position:relative;
-  --lego-outline:#1B1B1B;
-  --lego-red:#D6473C;
-  --lego-yellow:#E8B33B;
-  --lego-blue:#3E7FD1;
-  --lego-green:#4C9F6B;
-  --brick-h:clamp(18px, 3.6vw, 28px);
-  /* One consistent brick module, in % of the house's own width, sized so
-     5 of them equal the eave's 112% footprint. Every tier is a whole
-     number of this SAME unit (1,2,3,4,5 bricks) — that's what makes the
-     coursing come out staggered by exactly half a brick per side: tier N
-     is (N × unit) wide and centered, so it insets 0.5 unit from the tier
-     below it on each side, landing each tier's edge brick squarely on the
-     joint of the two bricks beneath it, the way real running-bond coursing
-     works. The previous version sized each tier's bricks independently
-     (flex:1 across arbitrary tier widths), so brick width drifted between
-     tiers and rows read as disconnected floating bars rather than one
-     structure. */
-  --brick-unit:22.4%;
-  /* Shared paper-grain (feTurbulence noise, alpha baked to ~6% in the
-     feColorMatrix) reused as a subtle plastic-texture layer on the roof and
-     wall bricks. */
-  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch' result='t'/%3E%3CfeColorMatrix in='t' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+/* ---------- About page: Core Competencies as a self-touring tower ----------
+   Replaces the previous LEGO house. A 5-floor building cross-section (real
+   art, assets/tower/*.png) inside a sky/mountains/skyline/ground scene, with
+   an elevator that auto-tours the floors (see js/about.js) and per-floor
+   info cards. Every interactive element is positioned in percentages of the
+   tower image's own box (it's `width:100%; height:auto` inside a
+   `position:relative` wrapper) so this scales at any container width with
+   no JS/resize listeners — don't switch these to fixed pixel positions.
+   Palette is scoped locally to .tower-scene (like .lego-house scoped its
+   own --lego-* set) rather than added to :root, since these exact hex
+   values are specific to this illustration, not new site-wide tokens. */
+.tower-scene{
+  /* No max-width/background/card chrome of its own — it's just the
+     positioning context for .tower-backdrop (below) and .tower-stage. The
+     building fills whatever width .wrap (1120px sitewide) gives it, same as
+     every other section's content; the sky behind it does not — see
+     .tower-backdrop's own comment. */
+  position:relative; margin:50px auto 0; padding:28px 0 0;
+  --red:#d6524a; --amber:#dba33f; --blue:#4b78d6; --green:#4f9d6e; --gold:#cf9a35;
 }
-/* Roof: five tiers of real brick elements, centered and narrowing toward
-   the top (1, 2, 3, 4, 5 bricks) built from one consistent brick module
-   (see --brick-unit above) so it reads as one continuous stepped-pyramid
-   structure — not a stack of separately-sized floating bars — and the
-   silhouette is unambiguously a pyramid, not just a couple of shallow
-   shoulders. */
-.lego-roof{ position:relative; display:flex; flex-direction:column; align-items:center; }
-/* The chimney is anchored from the roof's TOP (the peak) and reaches down
-   past it rather than being positioned off the roof's bottom edge — its
-   height is deliberately more than its distance above the peak, so its
-   lower half is embedded inside tiers t1–t3 (hidden behind their opaque
-   bricks, since they're later in the DOM and paint on top of it) while its
-   upper half pokes out above the roofline. That overlap is what makes it
-   read as built into the roof instead of hovering over it with a gap. */
-/* Tier spans (centered, N × --brick-unit wide): t1 38.8–61.2%, t2 27.6–
-   72.4%, t3 16.4–83.6%. At left:15% the chimney used to sit outside every
-   one of those ranges for the whole depth it was embedded (t1+t2's rows) —
-   there was no actual brick under it there, just the empty step space
-   beside the narrower tiers, so it read as floating unattached next to the
-   roof rather than piercing through it. left:19–27% sits inside t3's span
-   but outside t2's (the exposed "shoulder" where t3 is wider than t2), so
-   embedding down through that depth actually lands on t3's brick. */
-.lego-chimney{
-  position:absolute;
-  left:19%;
-  top:calc(var(--brick-h) * -1.3);
-  width:clamp(30px, 8%, 44px);
-  height:calc(var(--brick-h) * 3.8);
-  background:#9AA1AC;
-  border:3px solid var(--lego-outline);
-  border-bottom:none;
+/* The sky/mountains/skyline/ground breaks out to the full viewport width
+   instead of stopping at .tower-scene's own (`.wrap`-capped) edges — the
+   standard "full-bleed inside a centered container" trick: 100vw wide,
+   centered back under .tower-scene regardless of how narrow that parent
+   actually is, via left:50% + a matching negative margin. Height still
+   matches .tower-scene exactly (top:0; bottom:0), so it only expands
+   sideways, not into the section title above it. */
+.tower-backdrop{
+  position:absolute; top:0; bottom:0; left:50%; width:100vw; margin-left:-50vw;
+  overflow:hidden; z-index:0;
+  background:linear-gradient(180deg,#48c6f0 0%, #7ddaf5 42%, #bfe9f7 78%, #d9f1f9 100%);
 }
-.brick-tier{ display:flex; position:relative; z-index:1; }
-.brick-tier.t1{ width:calc(var(--brick-unit) * 1); }
-.brick-tier.t2{ width:calc(var(--brick-unit) * 2); }
-.brick-tier.t3{ width:calc(var(--brick-unit) * 3); }
-.brick-tier.t4{ width:calc(var(--brick-unit) * 4); }
-/* Eaves overhang the wall a little rather than sitting flush with it —
-   real roofs read wider than the walls they sit on. */
-.brick-tier.t5{ width:calc(var(--brick-unit) * 5); }
-.brick-tier .brick{
-  position:relative;
-  flex:1;
-  height:var(--brick-h);
-  /* Sunlit tint lives on each brick's own background now (lighter near the
-     top, darker toward the eaves via --sun-a/-b per tier below) instead of
-     one overlay rectangle spanning the whole roof's bounding box. That
-     overlay covered the box a pyramid actually occupies, not the pyramid's
-     silhouette — so it showed as a plain translucent rectangle floating in
-     the empty step notches beside the narrower tiers (most visibly right
-     where the chimney sits), reading as a stray "leftover square". */
-  background-image:
-    var(--grain),
-    linear-gradient(rgba(255,255,255,var(--sun-a, .2)), rgba(0,0,0,var(--sun-b, .06)));
-  background-color:var(--lego-red);
-  background-size:60px 60px, 100% 100%;
-  border:3px solid var(--lego-outline);
-}
-.brick-tier .brick + .brick{ border-left:none; }
-.brick-tier.t1 .brick{ --sun-a:.45; --sun-b:0; }
-.brick-tier.t2 .brick{ --sun-a:.35; --sun-b:.02; }
-.brick-tier.t3 .brick{ --sun-a:.25; --sun-b:.06; }
-.brick-tier.t4 .brick{ --sun-a:.15; --sun-b:.10; }
-.brick-tier.t5 .brick{ --sun-a:.06; --sun-b:.16; }
-/* H-O-M-E as a string of hanging lights under the eave, instead of four
-   flat tiles that had nothing visibly holding them there. A thin wire runs
-   the width of the eave; each letter hangs from it on its own short cord
-   and gets a warm glow, like a bulb rather than a plaque. */
-.lego-blocks{
-  position:relative; z-index:2;
-  display:flex; justify-content:center; align-items:flex-start;
-  gap:clamp(16px, 3.4vw, 26px);
-  margin-top:-8px;
-  padding-top:18px;
-}
-/* Fascia bridging the roof's wider eaves (t3, 112%) down to the narrower
-   wall (100%) below — without it, the overhang left a gap of bare page
-   background showing on either side, between the roof's outer edge and
-   the wall's edge inset beneath it. */
-.lego-blocks::before{
-  content:"";
-  position:absolute;
-  left:50%; top:14px; bottom:-6px;
-  width:112%;
-  transform:translateX(-50%);
-  background:#FBF8F1;
-  border-top:3px solid var(--lego-outline);
-  z-index:-1;
-}
-.lights-wire{
-  position:absolute;
-  top:9px; left:9%; right:9%; height:2px;
-  background:#3A3A3A;
-  border-radius:1px;
-  z-index:0;
-}
-.lego-block{
-  position:relative;
-  z-index:1;
-  margin-top:15px;
-  width:clamp(26px, 5.4vw, 34px); height:clamp(26px, 5.4vw, 34px);
-  display:flex; align-items:center; justify-content:center;
-  font-family:var(--display); font-weight:700; font-size:clamp(12px, 2.4vw, 15px); color:#fff;
-  border:3px solid var(--lego-outline);
-  border-radius:50%;
-  box-shadow:
-    inset 0 2px 0 rgba(255,255,255,.3),
-    inset 0 -3px 0 rgba(0,0,0,.18),
-    0 0 10px 2px var(--glow, rgba(255,255,255,.5));
-}
-.lego-block::before{
-  /* the short cord from the wire down to this bulb */
-  content:"";
-  position:absolute;
-  top:-15px; left:50%;
-  width:2px; height:15px;
-  background:#3A3A3A;
-  transform:translateX(-50%);
-}
-.lego-block:nth-child(2){ background:var(--lego-red); --glow:rgba(214,71,60,.55); }
-.lego-block:nth-child(3){ background:var(--lego-yellow); color:var(--navy); --glow:rgba(232,179,59,.6); }
-.lego-block:nth-child(4){ background:var(--lego-blue); --glow:rgba(62,127,209,.55); }
-.lego-block:nth-child(5){ background:var(--lego-green); --glow:rgba(76,159,107,.55); }
-.lego-wall{
-  position:relative;
-  /* Off-white brick wall — a grid of seam lines rather than studs, so the
-     roof, blocks, and the four window caps below stay the ones doing the
-     color work. */
-  background-image:
-    var(--grain),
-    repeating-linear-gradient(90deg, rgba(0,0,0,.16) 0 2px, transparent 2px 44px),
-    repeating-linear-gradient(0deg, rgba(0,0,0,.12) 0 2px, transparent 2px 32px),
-    linear-gradient(180deg, #FBF8F1, #F0ECE1);
-  background-size: 120px 120px, 100% 100%, 100% 100%, 100% 100%;
-  background-repeat: repeat, repeat, repeat, no-repeat;
-  border:5px solid var(--lego-outline);
-  border-top:none;
-  border-radius:0 0 14px 14px;
-  /* No bottom padding: the door and planters (.lego-yard) need to sit flush
-     against the wall's own bottom edge, which butts straight into the
-     green baseplate below — any padding here left them "floating" a strip
-     of bare wall above the ground instead of standing on it. */
-  padding:26px 24px 0;
-}
-/* Contact shadow at the roof/wall seam, like the roof casts a sliver of
-   shade onto the bricks just below it. */
-.lego-wall::before{
-  content:"";
-  position:absolute;
-  top:0; left:0; right:0; height:16px;
-  background:linear-gradient(180deg, rgba(0,0,0,.28), transparent);
-  pointer-events:none;
-}
-.lego-windows{ gap:18px; }
-.lego-windows .card{
-  position:relative;
-  background:#FFFDF8;
-  border:4px solid var(--lego-outline);
-  border-radius:12px;
-  padding-top:28px;
-  /* Layered material shadow: inset top-edge highlight (light from above), a
-     tight close shadow for contact, and a softer wider ambient shadow
-     further out — instead of one flat drop-shadow. */
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.8),
-    0 2px 4px rgba(0,0,0,.22),
-    0 10px 18px -6px rgba(0,0,0,.2);
-}
-.lego-windows .card::before{
-  /* colored cap bar, matching the H-O-M-E block colors 1:1 by index */
-  content:"";
-  position:absolute; top:0; left:0; right:0; height:14px;
-  background:var(--cap, var(--lego-red));
-  border-radius:8px 8px 0 0;
-  border-bottom:3px solid var(--lego-outline);
-}
-.lego-windows .card:nth-child(1){ --cap:var(--lego-red); }
-.lego-windows .card:nth-child(2){ --cap:var(--lego-yellow); }
-.lego-windows .card:nth-child(3){ --cap:var(--lego-blue); }
-.lego-windows .card:nth-child(4){ --cap:var(--lego-green); }
+.tower-cloud{ position:absolute; image-rendering:pixelated; pointer-events:none; opacity:.95; }
+.tower-cloud.c1{ top:6%; left:8%; width:14%; }
+.tower-cloud.c2{ top:3%; right:10%; width:11%; }
+.tower-cloud.c3{ top:16%; left:42%; width:9%; opacity:.8; }
 
-/* A door and two planters at the base of the wall — the touches that make
-   this read as a home, not just a wall of plaques. */
-.lego-yard{
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
-  gap:22px;
-  margin-top:22px;
+/* One continuous strip — hazy mountains behind a two-depth city skyline —
+   spans the full width of .tower-backdrop (the whole viewport now, not just
+   the tower's own column) so it shows through as an actual horizon on both
+   sides of the building. */
+.tower-cityscape{
+  position:absolute; left:0; right:0; bottom:6.6%; width:100%; height:auto;
+  image-rendering:pixelated; pointer-events:none; z-index:0;
 }
-.lego-door{
-  position:relative;
-  width:60px; height:88px;
-  background:var(--navy);
-  border:4px solid var(--lego-outline);
-  border-bottom:none;
-  border-radius:24px 24px 3px 3px;
-  box-shadow:inset 3px 0 0 rgba(255,255,255,.12), inset -3px 0 0 rgba(0,0,0,.18);
+
+.tower-ground{
+  position:absolute; left:0; right:0; bottom:0; height:6.6%;
+  background:linear-gradient(180deg,#8fbf7a 0%, #74a862 100%);
+  border-top:2px solid rgba(20,40,20,.25);
 }
-.door-knob{
-  position:absolute; top:50%; right:9px; transform:translateY(-50%);
-  width:7px; height:7px;
-  border-radius:50%;
-  background:var(--lego-yellow);
-  border:1.5px solid var(--lego-outline);
+.tower-ground::before{
+  content:""; position:absolute; inset:0;
+  background-image:radial-gradient(rgba(255,255,255,.18) 1px, transparent 1px);
+  background-size:7px 7px;
 }
-.lego-plant{ display:flex; flex-direction:column; align-items:center; }
-.plant-leaves{
-  position:relative;
-  width:32px; height:28px;
-  background:var(--lego-green);
-  border:3px solid var(--lego-outline);
-  border-radius:50%;
+
+/* container-type turns .tower-stage into a query container, so every
+   clamp() below that used to read `vw` (raw viewport width — wrong once
+   the tower could be wider or narrower than the viewport, per .wrap's own
+   1120px cap and .tower-stage's 90%-of-that) can read `cqw` instead: the
+   tower's own rendered width, the same box every position percentage in
+   this file is already relative to. Without this, text stopped growing
+   at a small fixed ceiling the moment the tower itself kept getting
+   bigger on wide screens. */
+.tower-stage{ position:relative; z-index:2; margin:0 auto; max-width:90%; container-type:inline-size; }
+.tower-stage > img{ display:block; width:100%; height:auto; pointer-events:none; }
+.tower-shadow{
+  position:absolute; left:8%; right:8%; bottom:9.2%; height:14px; border-radius:50%;
+  background:radial-gradient(ellipse at center, rgba(20,30,20,.28) 0%, rgba(20,30,20,0) 72%);
+  z-index:1;
 }
-.plant-leaves::after{
-  content:"";
-  position:absolute;
-  bottom:-5px; left:-9px;
-  width:20px; height:18px;
-  background:var(--lego-green);
-  border:3px solid var(--lego-outline);
-  border-radius:50%;
+
+/* Floor highlight rings — colored glow shown on whichever floor the
+   elevator is currently stopped at (js/about.js toggles .on and sets
+   --hl-color from the matching --red/--amber/--blue/--green/--gold above). */
+.tower-hl{
+  position:absolute; left:0; right:0; pointer-events:none;
+  box-shadow:inset 0 0 0 3px transparent; transition:box-shadow .3s ease;
 }
-.plant-pot{
-  width:30px; height:22px;
-  margin-top:-2px;
-  background:#C1652F;
-  border:3px solid var(--lego-outline);
-  border-radius:0 0 6px 6px;
+.tower-hl.on{ box-shadow:inset 0 0 0 3px #fff, inset 0 0 0 6px var(--hl-color, var(--gold)), 0 0 18px rgba(0,0,0,.25); }
+.tower-hl.rm1{ top:12.658%; height:16.908%; }
+.tower-hl.rm2{ top:29.566%; height:16.456%; }
+.tower-hl.rm3{ top:46.022%; height:16.094%; }
+.tower-hl.rm4{ top:62.116%; height:16.184%; }
+.tower-hl.rm0{ top:78.300%; height:16.184%; }
+
+/* Department name — always visible, top-left of each room, like a
+   Tiny-Tower shop label. No tag for the Lobby — it has its own "LOBBY"
+   signage baked into the art. */
+.tower-floor-tag{
+  position:absolute; left:16.7%;
+  background:rgba(255,255,255,.95); border:2px solid rgba(16,19,28,.85); border-radius:3px;
+  padding:2px 7px; font-family:'Press Start 2P',monospace; letter-spacing:.01em;
+  font-size:clamp(6px,1.25cqw,14px); color:var(--navy); white-space:nowrap;
+  box-shadow:1px 1px 0 rgba(0,0,0,.18);
+  /* Above the info card (z-index:6): the tag is the floor's name and stays
+     put; the card sits below it (see .tower-info.rmN tops) carrying only
+     the description, so the two never restate each other. */
+  z-index:7;
 }
-.lego-base{ display:flex; overflow:hidden; border-radius:0 0 8px 8px; }
-.lego-base .brick{
-  flex:1;
-  height:22px;
-  background:linear-gradient(180deg, #5CB85C, #3E9B3E);
-  border:3px solid var(--lego-outline);
+.tower-floor-tag.rm1{ top:13.7%; }
+.tower-floor-tag.rm2{ top:30.7%; }
+.tower-floor-tag.rm3{ top:47.1%; }
+.tower-floor-tag.rm4{ top:63.2%; }
+
+/* The H/O/M/E badge art is already painted into the tower image — these are
+   real, keyboard-focusable buttons precisely aligned on top of it (not the
+   mockup's plain unfocusable divs), invisible until hovered/focused/active.
+   The Lobby has no baked badge, so .tower-badge.l is a real visible chip
+   styled to match H/O/M/E instead of an invisible click target. */
+.tower-badge{
+  position:absolute; left:4.8%; width:6.4%; aspect-ratio:1/1; transform:translate(0,-50%);
+  cursor:pointer; z-index:4; border-radius:3px; padding:0;
+  background:none; border:2px solid transparent; appearance:none;
+  box-shadow:0 0 0 0 rgba(255,255,255,0); transition:box-shadow .15s ease;
 }
-.lego-base .brick + .brick{ border-left:none; }
-@media (max-width:760px){
-  .lego-windows{ grid-template-columns:1fr; }
+.tower-badge:hover{ box-shadow:0 0 0 2px rgba(255,255,255,.65); }
+.tower-badge:focus-visible{ outline:none; box-shadow:0 0 0 2px #fff, 0 0 0 4px var(--orange); }
+.tower-badge.active{ box-shadow:0 0 0 2px #fff, 0 0 12px 3px var(--gold); }
+.tower-badge.r{ top:21.112%; }
+.tower-badge.a{ top:37.793%; }
+.tower-badge.b{ top:54.069%; }
+.tower-badge.g{ top:70.208%; }
+/* No letter — H/O/M/E badges are baked into the tower art, but stacked
+   under those a lettered "L" chip read as "HOMEL". A plain gold chip still
+   marks the Lobby as a real stop without spelling anything. */
+.tower-badge.l{
+  background:linear-gradient(160deg,#f0c15c,var(--gold)); border:2px solid #10131c;
+  box-shadow:1px 1px 0 rgba(0,0,0,.35);
+}
+.tower-badge.l:hover{ box-shadow:1px 1px 0 rgba(0,0,0,.35), 0 0 0 2px rgba(255,255,255,.65); }
+.tower-badge.l:focus-visible{ outline:none; box-shadow:1px 1px 0 rgba(0,0,0,.35), 0 0 0 2px #fff, 0 0 0 4px var(--orange); }
+.tower-badge.l.active{ box-shadow:0 0 0 2px #fff, 0 0 12px 3px var(--gold); }
+.tower-badge.l{ top:86.392%; }
+
+/* CLAUDE.md's original width:11.4%/height:9.4% only filled ~57% of a
+   floor's height, leaving a gap above/below the car and a sliver of the
+   baked-in H/O/M/E badge underneath it exposed on every side. Fixing the
+   box alone couldn't work: elevator-car.png's own doors are roughly
+   square, but the box that actually fits a floor's shaft slot needs to be
+   much taller than wide, so any width/height combo either stretched the
+   doors into a distorted narrow shape (background-size:100% 100%) or left
+   empty padding inside the box (background-size:contain, correct
+   proportions but not actually filling the slot). Re-cropped
+   elevator-car.png itself (165x225, was 228x225 — cropped in from both
+   sides, not resized) to match this box's own ratio, narrowing the doors
+   for real rather than asking CSS to fake it; that crop also
+   trimmed a stray clipped control-box artifact that used to sit right at
+   the sprite's edge. z-index above .tower-badge (with pointer-events:none,
+   so it never blocks a click) so the car actually hides the Lobby's gold
+   chip when parked there, instead of that chip painting on top of it. */
+.tower-car{
+  position:absolute; left:2%; width:13%; height:14.5%;
+  background-image:url('/assets/tower/elevator-car.png');
+  background-size:100% 100%; background-repeat:no-repeat;
+  pointer-events:none;
+  transform:translateY(-50%);
+  filter:drop-shadow(2px 3px 2px rgba(0,0,0,.35));
+  transition:top .8s cubic-bezier(.3,.9,.4,1);
+  z-index:5;
+}
+
+/* A description plate that fades in inside the lower part of each floor's
+   band when the elevator arrives — starts below that floor's name tag
+   (left-aligned with it) and to the right of the elevator shaft, so it
+   overlaps neither. Left:16.7% matches .tower-floor-tag; the elevator car
+   ends at ~15%. Body copy is intentionally small for a small fixed box —
+   Opportunity and Engagement run longest, re-check those two for overflow
+   if the copy ever changes. */
+.tower-info{
+  position:absolute; left:16.7%; right:5.6%; display:flex; flex-direction:column; justify-content:center;
+  background:rgba(9,14,30,.92); border:2px solid var(--ic-color, #10131c);
+  padding:6px 9px; z-index:6; overflow:hidden;
+  opacity:0; transform:scale(.94); pointer-events:none;
+  transition:opacity .25s ease, transform .25s ease;
+}
+.tower-info.show{ opacity:1; transform:scale(1); }
+.tower-info p{
+  font-family:'VT323',monospace; font-size:clamp(9px,2.1cqw,20px); line-height:1.14; color:#dfe6ff;
+}
+.tower-info.rm1{ top:16.7%; height:11.8%; }
+.tower-info.rm2{ top:33.6%; height:11.3%; }
+.tower-info.rm3{ top:50%; height:11%; }
+.tower-info.rm4{ top:66.2%; height:11%; }
+
+/* On a phone-width tower every room is only ~55px tall, so the name tag
+   (which can't shrink past its own padding/border/6px text) eats a bigger
+   share of it — trim the tag, drop the copy below its clamp floor, and
+   nudge each card down a touch so the tag clears it cleanly. */
+@media (max-width:460px){
+  .tower-floor-tag{ padding:1px 4px; border-width:1px; }
+  .tower-info{ padding:3px 6px; }
+  .tower-info p{ font-size:7px; line-height:1; }
+  .tower-info.rm1{ top:18%; height:10.5%; }
+  .tower-info.rm2{ top:34.9%; height:10.3%; }
+  .tower-info.rm3{ top:51.2%; height:10.2%; }
+  .tower-info.rm4{ top:67.2%; height:10.4%; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .tower-car{ transition:none; }
+  .tower-hl{ transition:none; }
+  .tower-info{ transition:none; }
+}
+
+/* Generic visually-hidden utility (used by .tower-scene's live-region status
+   text below) — visible to screen readers, not sighted visitors. */
+.sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
 }
 
 /* Stacked rather than side by side, and narrower than the full section width —

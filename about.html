@@ -15,6 +15,12 @@
 <meta name="twitter:description" content="A-HOUSE's vision, mission, and the HOME principles that guide the Atenean Hub of Upcoming Student Entrepreneurs.">
 <meta name="twitter:image" content="https://a-house.netlify.app/assets/og-image.jpg">
 <link rel="icon" href="assets/logo-icon-sm.png">
+<!-- Only for the tower section's pixel-game display face and its info cards'
+     terminal-style body copy — Press Start 2P is already used elsewhere on
+     the site (Role Directory's CRT consoles); VT323 is new. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -91,65 +97,57 @@
         <span class="eyebrow">Core Competencies</span>
         <h2 style="margin-top:8px;">Not just A-HOUSE — also a HOME</h2>
       </div>
-      <div class="lego-house">
-        <div class="lego-roof">
-          <div class="lego-chimney"></div>
-          <div class="brick-tier t1"><span class="brick"></span></div>
-          <div class="brick-tier t2"><span class="brick"></span><span class="brick"></span></div>
-          <div class="brick-tier t3"><span class="brick"></span><span class="brick"></span><span class="brick"></span></div>
-          <div class="brick-tier t4"><span class="brick"></span><span class="brick"></span><span class="brick"></span><span class="brick"></span></div>
-          <div class="brick-tier t5"><span class="brick"></span><span class="brick"></span><span class="brick"></span><span class="brick"></span><span class="brick"></span></div>
+      <!-- Self-touring elevator: visits Harmony -> Opportunity -> Mentorship ->
+           Engagement -> Lobby -> repeat, ~4.2s per floor (see js/about.js).
+           Click any badge to jump straight there. Pauses on hover/focus and
+           whenever the visitor prefers reduced motion, same convention as
+           the site's photo carousels (js/carousel.js). -->
+      <div class="tower-scene" id="towerScene">
+        <!-- Sky/mountains/skyline/ground breaks out to the full viewport width
+             (same height as the tower itself, just wider) instead of stopping
+             at this section's own content column — the building stays sized
+             to the normal 1120px column, the sky behind it doesn't. -->
+        <div class="tower-backdrop" aria-hidden="true">
+          <img class="tower-cloud c1" src="assets/tower/cloud-1.png" alt="">
+          <img class="tower-cloud c2" src="assets/tower/cloud-2.png" alt="">
+          <img class="tower-cloud c3" src="assets/tower/cloud-1.png" alt="">
+          <img class="tower-cityscape" src="assets/tower/cityscape.png" alt="">
+          <div class="tower-ground"></div>
         </div>
-        <div class="lego-blocks">
-          <div class="lights-wire"></div>
-          <span class="lego-block">H</span>
-          <span class="lego-block">O</span>
-          <span class="lego-block">M</span>
-          <span class="lego-block">E</span>
+
+        <div class="tower-stage" id="towerStage">
+          <img src="assets/tower/tower.png" alt="A-HOUSE tower cross-section with a self-touring elevator visiting the Harmony, Opportunity, Mentorship, and Engagement floors, plus the ground-floor Lobby">
+
+          <div class="tower-hl rm0" data-room="0"></div>
+          <div class="tower-hl rm1" data-room="1"></div>
+          <div class="tower-hl rm2" data-room="2"></div>
+          <div class="tower-hl rm3" data-room="3"></div>
+          <div class="tower-hl rm4" data-room="4"></div>
+
+          <div class="tower-floor-tag rm1">HARMONY</div>
+          <div class="tower-floor-tag rm2">OPPORTUNITY</div>
+          <div class="tower-floor-tag rm3">MENTORSHIP</div>
+          <div class="tower-floor-tag rm4">ENGAGEMENT</div>
+
+          <!-- No repeated "01 · HARMONY" heading here — the always-visible
+               .tower-floor-tag above each card already names the floor.
+               These cards just carry the description. -->
+          <div class="tower-info rm1" id="towerInfo1"><p>Welcoming all students, regardless of their background or major, to access resources and support for their entrepreneurial endeavors.</p></div>
+          <div class="tower-info rm2" id="towerInfo2"><p>Providing students with opportunities to connect with industry experts and engage with the broader entrepreneurial ecosystem outside the university — including internships, competitions, and partnerships.</p></div>
+          <div class="tower-info rm3" id="towerInfo3"><p>Offering practical learning experiences through workshops, seminars, and real-world projects, while empowering students to spread entrepreneurial knowledge and opportunities to underserved communities.</p></div>
+          <div class="tower-info rm4" id="towerInfo4"><p>Actively engaging students in networking opportunities with entrepreneurs, investors, and professionals to foster collaboration and idea exchange, while committing to the continuous improvement of our programs and resources.</p></div>
+
+          <div class="tower-car" id="towerCar"></div>
+
+          <button type="button" class="tower-badge r" data-room="1" aria-label="Jump to Harmony floor"></button>
+          <button type="button" class="tower-badge a" data-room="2" aria-label="Jump to Opportunity floor"></button>
+          <button type="button" class="tower-badge b" data-room="3" aria-label="Jump to Mentorship floor"></button>
+          <button type="button" class="tower-badge g" data-room="4" aria-label="Jump to Engagement floor"></button>
+          <button type="button" class="tower-badge l" data-room="0" aria-label="Jump to Lobby"></button>
         </div>
-        <div class="lego-wall">
-          <div class="grid lego-windows">
-            <div class="card">
-              <div class="card-top">
-                <div class="card-code">01 · HARMONY</div>
-              </div>
-              <p class="lead" style="margin-top:8px;">Welcoming all students, regardless of their background or major, to access resources and support for their entrepreneurial endeavors.</p>
-            </div>
-            <div class="card">
-              <div class="card-top">
-                <div class="card-code">02 · OPPORTUNITY</div>
-              </div>
-              <p class="lead" style="margin-top:8px;">Providing students with opportunities to connect with industry experts and engage with the broader entrepreneurial ecosystem outside the university — including internships, competitions, and partnerships.</p>
-            </div>
-            <div class="card">
-              <div class="card-top">
-                <div class="card-code">03 · MENTORSHIP</div>
-              </div>
-              <p class="lead" style="margin-top:8px;">Offering practical learning experiences through workshops, seminars, and real-world projects, while empowering students to spread entrepreneurial knowledge and opportunities to underserved communities.</p>
-            </div>
-            <div class="card">
-              <div class="card-top">
-                <div class="card-code">04 · ENGAGEMENT</div>
-              </div>
-              <p class="lead" style="margin-top:8px;">Actively engaging students in networking opportunities with entrepreneurs, investors, and professionals to foster collaboration and idea exchange, while committing to the continuous improvement of our programs and resources.</p>
-            </div>
-          </div>
-          <div class="lego-yard">
-            <div class="lego-plant">
-              <div class="plant-leaves"></div>
-              <div class="plant-pot"></div>
-            </div>
-            <div class="lego-door"><span class="door-knob"></span></div>
-            <div class="lego-plant">
-              <div class="plant-leaves"></div>
-              <div class="plant-pot"></div>
-            </div>
-          </div>
-        </div>
-        <div class="lego-base">
-          <span class="brick"></span><span class="brick"></span><span class="brick"></span><span class="brick"></span>
-          <span class="brick"></span><span class="brick"></span><span class="brick"></span><span class="brick"></span>
-        </div>
+        <div class="tower-shadow"></div>
+
+        <div class="sr-only" role="status" aria-live="polite" id="towerAnnounce"></div>
       </div>
     </div>
   </section>
@@ -208,5 +206,6 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script src="js/about.js"></script>
 </body>
 </html>
