@@ -12,6 +12,62 @@ const ALL_TIERS = [
   {containerId:'tracks-stack-wrap', btnId:'mt-toggle'}
 ];
 
+/* Shared by toggleTier (the "Learn more" button) and openAndScroll (org
+   chart clicks) — lands a target's top just below the sticky nav (84px,
+   matching .section's own scroll-margin-top) instead of scrollIntoView's
+   default, which has no such offset and would tuck the target behind the
+   header.
+
+   The tier's own open transition (.tier-anim, .45s) is usually still
+   animating the very first time this runs — a fresh element inside a
+   collapsing/expanding accordion doesn't have its final position yet, so
+   that first call is only ever a rough pass. Pass `wrap` (the .tier-anim
+   element actually being opened, if this call is the one opening it) and
+   the correction fires off that transition's real `transitionend` instead
+   of a guessed delay: computing the rough pass's target against a
+   not-yet-laid-out accordion can come out at/near 0, and a second
+   `scrollTo` fired at a guessed delay races the browser's own smooth-
+   scroll timing for the (possibly still in-flight) first call — on a slow
+   layout or long scroll distance the guess can lose that race and the
+   correction never visibly lands. transitionend has no such guess. Falls
+   back to a delay only when there's no wrap to listen on (openAndScroll,
+   when the tier was already open and nothing is transitioning).
+
+   skipImmediate drops that first rough-pass call entirely. It matters when
+   a DIFFERENT tier is closing in the same click (toggleTier switching from
+   one open section to another): at the instant this runs, that other
+   tier's collapse hasn't been painted yet, so it still measures at its old
+   full height and pushes this target artificially far down the page — the
+   rough pass would smooth-scroll toward that too-low spot, then the
+   transitionend correction yanks it back up, reading as an overshoot-then-
+   snap-back. Skipping straight to the transitionend/fallback-triggered
+   scroll means only the correct, final position is ever animated to. */
+function scrollIntoFocus(target, wrap, skipImmediate){
+  if(!target) return;
+  const scroll = () => {
+    const rect = target.getBoundingClientRect();
+    const targetY = window.scrollY + rect.top - 84;
+    window.scrollTo({top: Math.max(targetY, 0), behavior: 'smooth'});
+  };
+  if(!skipImmediate) scroll();
+  if(wrap){
+    let fallback;
+    const onEnd = (e) => {
+      if(e.target !== wrap || e.propertyName !== 'grid-template-rows') return;
+      wrap.removeEventListener('transitionend', onEnd);
+      clearTimeout(fallback);
+      scroll();
+    };
+    wrap.addEventListener('transitionend', onEnd);
+    // Covers prefers-reduced-motion (no transition ever fires) and any
+    // other case transitionend doesn't — same 480ms guess as before, but
+    // now only a backstop, not the primary mechanism.
+    fallback = setTimeout(() => { wrap.removeEventListener('transitionend', onEnd); scroll(); }, 480);
+  } else {
+    setTimeout(scroll, 480);
+  }
+}
+
 /* Collapse/expand one of the four tiers above. All four start hidden on page
    load (see class="tier-hidden" on each container in directory.html) —
    nothing is expanded until a visitor taps the matching org chart box or this
@@ -27,12 +83,14 @@ function toggleTier(containerId, btnId){
   const container = document.getElementById(containerId);
   const btn = document.getElementById(btnId);
   const willOpen = !btn.classList.contains('open');
+  let closedAnother = false;
 
   if(willOpen){
     ALL_TIERS.forEach(t => {
       if(t.containerId === containerId) return;
       const otherBtn = document.getElementById(t.btnId);
       if(otherBtn && otherBtn.classList.contains('open')){
+        closedAnother = true;
         otherBtn.classList.remove('open');
         document.getElementById(t.containerId).classList.add('tier-hidden');
         otherBtn.setAttribute('aria-expanded', 'false');
@@ -45,6 +103,32 @@ function toggleTier(containerId, btnId){
   container.classList.toggle('tier-hidden', !isOpen);
   btn.setAttribute('aria-expanded', String(isOpen));
   btn.querySelector('.tier-toggle-label').textContent = isOpen ? 'Hide' : 'Learn more';
+
+  if(isOpen){
+    // Same "bring the console into view" behavior as clicking an org chart
+    // node (openAndScroll) — falls back to the container itself for
+    // Members, the one tier with no .crt-console. skipImmediate
+    // (closedAnother) when switching straight from one open tier to
+    // another — see scrollIntoFocus's own comment for why.
+    scrollIntoFocus(container.querySelector('.crt-console') || container, container, closedAnother);
+  } else {
+    // Closing from the console's own bottom Hide button (.crt-hide-btn)
+    // leaves the viewport wherever it happened to be scrolled to inside a
+    // console that's now gone — everything below where you were scrolled
+    // shifts up to fill that space, landing you on whatever used to be
+    // further down the page. Scrolling back to the section you just closed
+    // returns you there instead — the section itself (not the button),
+    // so the divider above it lands cleanly under the sticky nav with the
+    // section's own top padding as breathing room, rather than the "Learn
+    // more" button sitting cramped right against the nav with nothing
+    // above it in view.
+    scrollIntoFocus(btn.closest('.section') || btn, container);
+  }
+
+  // Tells callers (ensureTierVisible/openAndScroll) whether this call just
+  // switched away from a different open tier — see scrollIntoFocus's
+  // comment on skipImmediate for why that matters to them too.
+  return closedAnother;
 }
 
 /* If a chart node's card lives inside a collapsed tier, open that tier first —
@@ -55,20 +139,25 @@ function toggleTier(containerId, btnId){
    has to be un-hidden AND that one department's tile selected, since a card
    can be hidden by either. */
 function ensureTierVisible(el){
+  let switchedTiers = false;
   for(const t of ALL_TIERS){
     const container = document.getElementById(t.containerId);
     if(container && container.contains(el) && container.classList.contains('tier-hidden')){
-      toggleTier(t.containerId, t.btnId);
+      switchedTiers = toggleTier(t.containerId, t.btnId) || switchedTiers;
     }
   }
   const panel = el.closest('.dept-panel-content');
   if(panel) selectDeptTab(panel.dataset.tier, panel.dataset.id);
+  return switchedTiers;
 }
 
 function openAndScroll(slug){
   const el = document.getElementById('role-' + slug);
   if(!el) return;
-  ensureTierVisible(el);
+  // If this closed a different open tier to reveal `el`'s own, skip this
+  // function's own immediate scroll below too — same overshoot risk as
+  // toggleTier's, since that other tier's collapse still hasn't painted.
+  const skipImmediate = ensureTierVisible(el);
 
   // Not el.scrollIntoView() — el sits inside a horizontally snap-scrolling
   // .dept-screen-track, and the outer tier is still mid-transition (the
@@ -76,19 +165,17 @@ function openAndScroll(slug){
   // started) when this runs. scrollIntoView's automatic inline adjustment
   // reads that not-yet-settled layout and can nudge the track off page 0,
   // which the scroll-snap then "corrects" onto the wrong page once layout
-  // catches up. A plain vertical window scroll never touches the track, so
-  // it can't trigger that at all.
-  const scrollToRole = () => {
-    const rect = el.getBoundingClientRect();
-    const targetY = window.scrollY + rect.top - (window.innerHeight / 2 - rect.height / 2);
-    window.scrollTo({top: Math.max(targetY, 0), behavior: 'smooth'});
-  };
-  scrollToRole();
-  // Re-assert once the tier's own open transition (see .tier-anim, .45s) has
-  // finished, since that's what was still moving under us above — by then
-  // el's real position is stable, so this corrects any drift from the first
-  // scroll without re-triggering it (a second identical scrollTo is a no-op).
-  setTimeout(scrollToRole, 480);
+  // catches up. scrollIntoFocus's plain vertical window scroll never
+  // touches the track, so it can't trigger that at all.
+  //
+  // Lands on the console's own top edge (not el itself) — centering the
+  // small role-block in the viewport put a variable, unpredictable amount
+  // of the section's "Tier 0N — Live / <Board name> / description" header
+  // above it, sometimes pushing the roster tray below the fold instead.
+  // ensureTierVisible already reset the screen to the Overview page, where
+  // this role's block always sits right after the console's own title, so
+  // landing on the console's top keeps it in view too.
+  scrollIntoFocus(el.closest('.crt-console') || el, undefined, skipImmediate);
 
   el.classList.add('flash');
   setTimeout(() => el.classList.remove('flash'), 1400);
@@ -490,6 +577,15 @@ function renderCrtBoard(tier, gridId, {consoleLabel, rosterLabel, locked, groups
         <div class="crt-scanlines" aria-hidden="true"></div>
         <img class="crt-enter-photo" id="${tier}-enter-photo" src="" alt="" aria-hidden="true">
         <div class="crt-content" id="${tier}-departments-inner"></div>
+        <!-- Same toggleTier() the section's own "Learn more"/Hide button
+             calls (keeps both buttons, and the label on the one up top,
+             in sync) — reachable from the bottom of a long console without
+             scrolling all the way back up past the roster to close it.
+             Reuses .tier-toggle's exact look; already in its "open" state
+             since this only ever renders while the console is showing. -->
+        <button type="button" class="tier-toggle open crt-hide-btn" onclick="toggleTier('${gridId}-wrap','${tier}-toggle')">
+          <span class="chev"></span><span class="tier-toggle-label">Hide</span>
+        </button>
       </div>
     </div>
   `;
@@ -515,7 +611,7 @@ function renderMB(){
     return {dept, tileSubtitle: r.code.replace('MB · ', ''), stageHeadHtml, pages, photoUrl: deptPhoto[dept.key]};
   });
   renderCrtBoard('mb', 'mb-grid', {
-    consoleLabel: 'A-HOUSE // ROLE-TERMINAL',
+    consoleLabel: 'A-HOUSE // MANAGEMENT BOARD TERMINAL',
     rosterLabel: 'Select department — Management Board roster',
     groups
   });
@@ -536,7 +632,7 @@ function renderEB(){
     return {dept, tileSubtitle: 'HEAD', stageHeadHtml, pages, photoUrl: deptPhoto[dept.key]};
   });
   renderCrtBoard('eb', 'eb-departments', {
-    consoleLabel: 'A-HOUSE // HEAD-TERMINAL',
+    consoleLabel: 'A-HOUSE // EXECUTIVE BOARD TERMINAL',
     rosterLabel: 'Select department — Executive Board roster',
     locked: true,
     groups
@@ -645,6 +741,7 @@ function renderDeptSelector(tier, containerId, groups){
       requestAnimationFrame(() => {
         const idx = Math.round(track.scrollLeft / track.clientWidth);
         dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        syncMobilePageHeight(track);
         ticking = false;
       });
     });
@@ -653,25 +750,113 @@ function renderDeptSelector(tier, containerId, groups){
   lockScreenHeight(container);
 }
 
-/* The screen's height would otherwise follow whichever department/page is
-   showing — a short "Overview" then a long "Key Responsibilities" list makes
-   the whole console visibly grow and shrink as you click around. Instead,
-   measure every department's tallest page up front (each swapped into flow
-   just long enough to read its height, synchronously, so nothing is ever
-   actually painted mid-swap) and lock the screen to that one height via a
-   CSS variable — same trick as a carousel with mixed-length slides. */
+/* The screen's height would otherwise follow whichever page is showing — a
+   short "Overview" then a long "Key Responsibilities" list makes the whole
+   console visibly grow and shrink as you swipe between them. Fixed per
+   department (each swapped into flow just long enough to read its own 3
+   pages' true heights, synchronously, so nothing is ever actually painted
+   mid-swap) rather than one height shared across every department in the
+   tier — .dept-screen-track is a flex row, so its 3 pages already stretch
+   to match whichever of the three is tallest for THAT department; sharing
+   one number across all 6 departments as well meant one department's long
+   "Key Responsibilities" was inflating every other department's short
+   "Skills" page too, most of it empty space. align-self:flex-start,
+   applied only for the instant of measuring, opts a page out of that
+   stretch so it reports its own real content height instead of a
+   sibling's.
+
+   That measurement is only ever as good as the width (and fonts) it was
+   taken at, though — text wraps differently at other widths, and Press
+   Start 2P's blocky glyphs wrap very differently from whatever fallback
+   font was showing before it finished loading. So a lock computed once at
+   page load goes stale the moment the viewport resizes, or the moment a
+   web font swaps in after first paint: either a dead gap under short
+   content (locked height too tall for current conditions) or
+   clipped/overflowing content (too short). heightLockedContainers + the
+   resize listener below re-measure every console when that happens, and
+   selectDeptTab() re-measures again right before showing anything, so the
+   lock always matches whatever width/fonts are actually in effect now.
+
+   On top of the per-department measurement, every console in the same
+   container is then capped to the SHORTEST department's own height (e.g.
+   Management Board's Growth, whose 3-bullet "Key Responsibilities" is the
+   tier's shortest) instead of each keeping its own, taller number — a
+   department like Talent (4 bullets) would otherwise render as a visibly
+   bigger console just because its role happens to have one more
+   responsibility. Whatever page pushes a department over that cap (almost
+   always Key Responsibilities) scrolls internally instead — see
+   .crt-content .dept-screen-page's overflow-y in style.css — so the extra
+   content is still reachable, it just doesn't grow the console. */
+const heightLockedContainers = [];
 function lockScreenHeight(container){
-  const stage = container.querySelector('.dept-stage');
+  if(!heightLockedContainers.includes(container)) heightLockedContainers.push(container);
   const panels = container.querySelectorAll('.dept-panel-content');
-  let maxH = 0;
+  const measurements = [];
   panels.forEach(panel => {
     const wasHidden = panel.hidden;
     panel.hidden = false;
-    const h = panel.querySelector('.dept-screen').offsetHeight;
-    if(h > maxH) maxH = h;
+    let maxH = 0;
+    panel.querySelectorAll('.dept-screen-page').forEach(page => {
+      page.style.alignSelf = 'flex-start';
+      if(page.offsetHeight > maxH) maxH = page.offsetHeight;
+      page.style.alignSelf = '';
+    });
     panel.hidden = wasHidden;
+    if(maxH > 0) measurements.push({panel, maxH});
   });
-  if(maxH > 0) stage.style.setProperty('--screen-min-h', maxH + 'px');
+  if(!measurements.length) return;
+  const capH = Math.min(...measurements.map(m => m.maxH));
+  measurements.forEach(({panel}) => {
+    panel.querySelector('.dept-screen-track').style.setProperty('--screen-min-h', capH + 'px');
+  });
+}
+
+/* Below this width, even a per-department lock (above) still means every
+   page shares that department's tallest one — usually "Key
+   Responsibilities", since its bullets wrap to far more lines on a narrow
+   phone than they do on desktop. That's the console being padded out well
+   past the short "Overview" page shown by default, eating into a phone's
+   limited height for no benefit a mobile visitor can even see (there's no
+   swipe-jump to avoid feeling if they haven't swiped anywhere yet). Below
+   this width the currently-visible page's own height wins instead —
+   swiping to a longer page can resize the console there, a trade a phone
+   visitor trying to actually reach the roster tray comes out ahead on. */
+const MOBILE_SCREEN_BREAKPOINT = 760;
+function syncMobilePageHeight(track){
+  if(window.innerWidth > MOBILE_SCREEN_BREAKPOINT) return;
+  const idx = Math.round(track.scrollLeft / track.clientWidth);
+  const page = track.querySelectorAll('.dept-screen-page')[idx];
+  if(!page) return;
+  page.style.alignSelf = 'flex-start';
+  const h = page.offsetHeight;
+  page.style.alignSelf = '';
+  if(h > 0) track.style.setProperty('--screen-min-h', h + 'px');
+}
+
+// lockScreenHeight sets every panel back to its department-wide lock, so
+// any panel currently on screen (not [hidden]) needs syncMobilePageHeight
+// re-applied right after on mobile, same as selectDeptTab does — otherwise
+// resizing into/within mobile width with a department already open leaves
+// the wider department-lock in effect until the next tile click.
+function relockAndResync(container){
+  lockScreenHeight(container);
+  container.querySelectorAll('.dept-panel-content:not([hidden])').forEach(panel => {
+    syncMobilePageHeight(panel.querySelector('.dept-screen-track'));
+  });
+}
+
+let screenHeightResizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(screenHeightResizeTimer);
+  screenHeightResizeTimer = setTimeout(() => {
+    heightLockedContainers.forEach(relockAndResync);
+  }, 250);
+});
+// Google Fonts load with display:swap — the fallback font's metrics can
+// wrap text differently than Press Start 2P/Rajdhani once they arrive,
+// so re-lock again after they're actually in, not just on first paint.
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(() => heightLockedContainers.forEach(relockAndResync));
 }
 
 function selectDeptTab(tier, id){
@@ -691,6 +876,14 @@ function selectDeptTab(tier, id){
   document.querySelectorAll(`.dept-panel-content[data-tier="${tier}"]`).forEach(c => {
     c.hidden = c.dataset.id !== id;
   });
+  // Re-measure right before showing anything, not just once at page load —
+  // the initial lock can go stale from a resize (see the listener below) but
+  // also, less obviously, from a web font finishing its swap-in after first
+  // paint: Press Start 2P's blocky glyphs wrap text very differently than
+  // whatever fallback font was showing a moment earlier, and that's a much
+  // bigger height swing than a resize. Recomputing on every selection means
+  // it's always measuring the fonts/width actually in effect right now.
+  lockScreenHeight(document.getElementById(tier + '-departments-inner'));
   // The tile carries its own department key separately from `id` (see
   // renderDeptSelector) — that's what colors the console and picks which
   // photo enters, even when several tiles (Department Teams) share one.
@@ -704,6 +897,9 @@ function selectDeptTab(tier, id){
   const track = activePanel.querySelector('.dept-screen-track');
   track.scrollTo({left: 0, behavior: 'instant'});
   activePanel.querySelectorAll('.dept-screen-dot').forEach((d, i) => d.classList.toggle('active', i === 0));
+  // On mobile this overrides the per-department lockScreenHeight() just set
+  // above with just the Overview page's own (usually much shorter) height.
+  syncMobilePageHeight(track);
 }
 
 /* The large duotone cutout that "enters" from the right edge of the CRT
